@@ -105,10 +105,13 @@ class SecurityWizardController extends ApiControllerBase
         $output = [];
         $rc = 0;
         exec($cmd, $output, $rc);
+        $text = implode("\n", array_slice($output, 0, 20));
+        // configd may return rc=0 even when the action failed (e.g. "Error (126)").
+        $failed = $rc !== 0 || preg_match('/^\s*(Error|Action not allowed)/i', $text) === 1;
         return [
             'action' => $action,
-            'ok' => $rc === 0,
-            'output' => implode("\n", array_slice($output, 0, 20)),
+            'ok' => !$failed,
+            'output' => $text,
         ];
     }
 }
