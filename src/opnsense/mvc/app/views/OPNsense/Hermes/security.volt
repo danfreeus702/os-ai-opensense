@@ -1,10 +1,10 @@
 <?php
 /**
- * Hermes AI — 3-Tier Security Wizard
+ * OPNsense AI - Security Wizard
  */
 ?>
 <div class="page-header">
-    <h1>Hermes AI — Security Wizard</h1>
+    <h1>OPNsense AI - Security Wizard</h1>
     <p class="lead">Pick a security level. Review the plan. Apply with one click.</p>
 </div>
 
