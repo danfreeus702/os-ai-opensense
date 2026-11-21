@@ -225,3 +225,43 @@ browser console errors.
 
 GitHub repo URL to update manually to:
 https://github.com/danfreeus702/os-ai-opensense (rename in GitHub settings).
+
+## 2026-11-21 — Firewall rule installation tested & fixed
+
+Found and fixed real bugs in the firewall step:
+
+- The plan claimed explicit rules would be added, but the action skipped
+  everything when a default "allow LAN to any" rule existed (no-ops).
+- Without that default rule, the legacy action added ALL THREE ports at every
+  level and duplicated them on re-apply (no idempotency, no level scoping).
+- DNS only covered TCP, not UDP.
+
+Fixed:
+
+- Three separate configd actions: `firewall-dns`, `firewall-doh`, `firewall-dot`
+  (`actions_aiopensense.conf`), controller allowlist updated.
+- `security.py`: `_firewall_rule()` adds one scoped LAN pass rule, idempotent by
+  exact description; DNS adds both TCP 53 and UDP 53; DoH TCP 443; DoT TCP 853.
+- Plan text now accurately describes what is installed.
+
+Also hit and fixed a regression during the edit: replacing the firewall block
+accidentally deleted `action_clamav`, `action_crowdsec` and `action_record_level`
+while the dispatch table still referenced them (all configd actions failed with
+`Error (1)`). Restored and verified.
+
+Verification on .50 from a clean slate (0 wizard rules):
+
+| Level | Wizard rules after apply | Expected |
+|---|---|---|
+| 1 | 2 (DNS TCP 53, UDP 53) | pass |
+| 2 | 3 (+ DoH TCP 443) | pass |
+| 3 | 4 (+ DoT TCP 853) | pass |
+| Re-apply 1/2/3 | still 4, zero duplicates | pass |
+
+All 8 actions returned OK at each level with zero failures. Rules verified in
+config.xml (4, exact descriptions/ports) AND in the active pf ruleset:
+`port = domain` (53 tcp + udp), `port = https` (443), `port = domain-s` (853).
+config.xml valid `644 root:wheel`, configd running, browser console clean.
+
+Note: pf displays well-known ports by NAME (`domain`, `https`, `domain-s`) —
+grepping pfctl output for numeric ports gives false negatives.
