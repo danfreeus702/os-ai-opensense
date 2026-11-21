@@ -8,7 +8,9 @@ DNS settings — ready to review and apply.
 **Cloud LLM only** (OpenRouter primary, NVIDIA NIM fallback). No local/Ollama
 backend, so it works on appliances with limited resources.
 
-🔗 **Live repo:** https://github.com/danfreeus702/os-ai-opensense-plugin
+🔗 **Live repo:** https://github.com/danfreeus702/os-ai-opensense
+
+**License:** dual-licensed under [ISC](LICENSE) or [MIT](LICENSE-MIT), at your option — both permissive, matching the OPNsense core's style.
 
 ---
 
@@ -57,6 +59,15 @@ All three levels were applied through the real OPNsense GUI, then the full
 sequence was run again for idempotency: **6/6 runs passed, zero failures**.
 Final config values, service health, LLM path, and browser console were all
 verified. Full details in [NOTES.md](NOTES.md).
+
+## Support this work
+
+If this plugin saved you time, you can support ongoing development:
+
+- ⭐ Star the repo and share it.
+- 💛 [GitHub Sponsors](https://github.com/sponsors/danfreeus702) — enable Sponsors in your GitHub settings first, then this link becomes active.
+- 📘 **Practical guide:** *OPNsense AI Security Wizard: The Practical Guide* — see `docs/ebook-opnsense-ai-guide.md` for the draft.
+- 🛠 **Paid setup/help:** open an issue or discussion for commercial support enquiries.
 
 ## Why this project
 
