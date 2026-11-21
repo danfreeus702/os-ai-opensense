@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OPNsense AI — illustrated flyer</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; width: 1200px;
+    background: #f4ecd8;
+    color: #16243f;
+    font-family: "Trebuchet MS", "Segoe UI", system-ui, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { padding: 34px 44px 44px; }
+  .topbar { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .logo { background:#1d3a7a; color:#fff; border-radius:12px; padding:10px 14px; font-weight:800; font-size:20px; letter-spacing:-.5px; }
+  .logo em { color:#ffd84d; font-style:normal; }
+  .tag { font-size:15px; font-weight:700; color:#5a4b33; }
+  .tag b { color:#d8473d; }
+
+  .banner {
+    background: linear-gradient(#ffe98a, #ffd23f);
+    border: 4px solid #1b2f55;
+    border-radius: 999px;
+    box-shadow: 0 6px 0 #c9a227;
+    padding: 18px 30px;
+    text-align:center;
+    font-size: 40px;
+    font-weight: 900;
+    letter-spacing: -.5px;
+  }
+  .banner span { color:#d8473d; }
+
+  .intro { display:flex; gap:22px; margin-top:26px; }
+  .persona {
+    width: 280px; flex:none;
+    background:#fffaf0; border:3px solid #1b2f55; border-radius:20px;
+    padding:10px; text-align:center; box-shadow:0 5px 0 #d8c9a8;
+  }
+  .bubble {
+    background:#fff; border:3px solid #1b2f55; border-radius:18px;
+    padding:12px 10px; font-size:17px; font-weight:800; line-height:1.25;
+    position:relative; margin-bottom:8px;
+  }
+  .bubble:after { content:""; position:absolute; bottom:-14px; left:50%; transform:translateX(-50%);
+    border:8px solid transparent; border-top-color:#1b2f55; }
+  .diagram { flex:1; background:#fffaf0; border:3px solid #1b2f55; border-radius:20px; padding:14px; box-shadow:0 5px 0 #d8c9a8; }
+
+  .row { display:flex; gap:18px; margin-top:22px; }
+  .card { flex:1; background:#fffaf0; border:3px solid #1b2f55; border-radius:18px; padding:16px 18px; box-shadow:0 5px 0 #d8c9a8; }
+  .card h3 { margin:0 0 8px; font-size:22px; }
+  .pill { display:inline-block; border-radius:999px; padding:5px 12px; font-weight:800; font-size:14px; color:#fff; margin-bottom:8px; }
+  .p1{background:#2fa88f;} .p2{background:#3d6fd0;} .p3{background:#e08a2e;}
+  .card ul { margin:0; padding-left:18px; font-size:16px; line-height:1.5; }
+  .card li { margin-bottom:3px; }
+
+  .lower { display:flex; gap:18px; margin-top:22px; }
+  .terminal { flex:1.1; background:#142238; border:3px solid #1b2f55; border-radius:18px; padding:16px 18px; color:#bfe9c8; font-family:"Courier New",monospace; font-size:16px; line-height:1.7; box-shadow:0 5px 0 #d8c9a8; }
+  .terminal .prompt { color:#ffd84d; }
+  .scenario { flex:1; background:#fffaf0; border:3px solid #1b2f55; border-radius:18px; padding:16px 18px; box-shadow:0 5px 0 #d8c9a8; }
+  .scenario h3 { margin:0 0 10px; font-size:22px; }
+  .scenario div { font-size:16px; margin:6px 0; }
+  .yes { color:#1f8a5b; font-weight:800; }
+  .no { color:#d8473d; font-weight:800; }
+
+  .question {
+    margin-top:22px; background:linear-gradient(#fff0a8,#ffd23f);
+    border:4px solid #1b2f55; border-radius:999px; padding:18px 30px;
+    text-align:center; font-size:34px; font-weight:900; box-shadow:0 6px 0 #c9a227;
+  }
+  .question small { display:block; font-size:18px; font-weight:700; color:#3d4d63; margin-top:6px; }
+  .foot { text-align:center; margin-top:18px; font-size:16px; font-weight:800; color:#3d4d63; }
+  .foot span { color:#1d3a7a; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="logo">Ni<em>! </em>Networking with Daniel</div>
+    <div class="tag">AI <b>SECURITY</b> CHALLENGE &nbsp;•&nbsp; OPNsense 26.7</div>
+  </div>
+
+  <div class="banner">One firewall. Three levels. <span>Zero guesswork.</span></div>
+
+  <div class="intro">
+    <div class="persona">
+      <div class="bubble">Which level fits<br>my network?</div>
+      <svg width="250" height="235" viewBox="0 0 250 235" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="125" cy="220" rx="92" ry="12" fill="#e2d5b8"/>
+        <path d="M58 220 Q60 150 125 150 Q190 150 192 220 Z" fill="#1d3a7a" stroke="#16243f" stroke-width="4"/>
+        <path d="M104 152 L125 178 L146 152" fill="#fff" stroke="#16243f" stroke-width="3"/>
+        <rect x="112" y="170" width="26" height="20" rx="4" fill="#2fa88f"/>
+        <text x="125" y="185" font-size="12" font-family="Arial" font-weight="bold" fill="#fff" text-anchor="middle">AI</text>
+        <circle cx="125" cy="105" r="57" fill="#f3c9a2" stroke="#16243f" stroke-width="4"/>
+        <path d="M68 100 Q70 45 125 47 Q180 45 182 100 Q170 70 145 68 Q120 82 95 68 Q78 76 68 100 Z" fill="#2f2b2a" stroke="#16243f" stroke-width="3"/>
+        <circle cx="104" cy="104" r="17" fill="none" stroke="#16243f" stroke-width="4"/>
+        <circle cx="146" cy="104" r="17" fill="none" stroke="#16243f" stroke-width="4"/>
+        <path d="M121 104 L129 104" stroke="#16243f" stroke-width="4"/>
+        <circle cx="104" cy="105" r="4" fill="#16243f"/><circle cx="146" cy="105" r="4" fill="#16243f"/>
+        <path d="M112 132 Q125 142 138 132" fill="none" stroke="#16243f" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="176" cy="134" r="13" fill="#f3c9a2" stroke="#16243f" stroke-width="3"/>
+      </svg>
+    </div>
+
+    <div class="diagram">
+      <svg width="820" height="260" viewBox="0 0 820 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#1b2f55"/>
+          </marker>
+        </defs>
+        <!-- router -->
+        <rect x="300" y="8" width="220" height="60" rx="12" fill="#3d6fd0" stroke="#16243f" stroke-width="4"/>
+        <text x="410" y="32" font-size="20" font-family="Trebuchet MS" font-weight="bold" fill="#fff" text-anchor="middle">OPNsense 26.7</text>
+        <text x="410" y="55" font-size="14" font-family="Trebuchet MS" fill="#dce9ff" text-anchor="middle">firewall • DNS • protection</text>
+        <!-- switch -->
+        <rect x="310" y="104" width="200" height="52" rx="10" fill="#1b2f55" stroke="#16243f" stroke-width="4"/>
+        <g fill="#7fd1c1">
+          <rect x="326" y="120" width="18" height="18" rx="3"/><rect x="352" y="120" width="18" height="18" rx="3"/>
+          <rect x="378" y="120" width="18" height="18" rx="3"/><rect x="404" y="120" width="18" height="18" rx="3"/>
+          <rect x="430" y="120" width="18" height="18" rx="3"/><rect x="456" y="120" width="18" height="18" rx="3"/>
+          <rect x="482" y="120" width="18" height="18" rx="3"/>
+        </g>
+        <line x1="410" y1="68" x2="410" y2="100" stroke="#2fa88f" stroke-width="5" marker-end="url(#arr)"/>
+        <!-- PCs -->
+        <g stroke="#16243f" stroke-width="3">
+          <rect x="60" y="194" width="130" height="58" rx="8" fill="#d9f2e8"/><rect x="345" y="194" width="130" height="58" rx="8" fill="#dfe9fb"/><rect x="630" y="194" width="130" height="58" rx="8" fill="#ffe1c2"/>
+          <rect x="95" y="252" width="60" height="6" rx="2" fill="#16243f"/><rect x="380" y="252" width="60" height="6" rx="2" fill="#16243f"/><rect x="665" y="252" width="60" height="6" rx="2" fill="#16243f"/>
+        </g>
+        <text x="125" y="218" font-size="16" font-family="Trebuchet MS" font-weight="bold" text-anchor="middle">PC 1 • L1</text>
+        <text x="410" y="218" font-size="16" font-family="Trebuchet MS" font-weight="bold" text-anchor="middle">PC 2 • L2</text>
+        <text x="695" y="218" font-size="16" font-family="Trebuchet MS" font-weight="bold" text-anchor="middle">PC 3 • L3</text>
+        <path d="M370 156 Q180 160 125 190" fill="none" stroke="#2fa88f" stroke-width="5" marker-end="url(#arr)"/>
+        <path d="M410 156 L410 190" fill="none" stroke="#3d6fd0" stroke-width="5" marker-end="url(#arr)"/>
+        <path d="M450 156 Q640 160 695 190" fill="none" stroke="#e08a2e" stroke-width="5" marker-end="url(#arr)"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <span class="pill p1">LEVEL 1</span>
+      <h3>Foundations</h3>
+      <ul><li>Ad blocking</li><li>Local DNS cache</li><li>ClamAV antivirus</li></ul>
+    </div>
+    <div class="card">
+      <span class="pill p2">LEVEL 2</span>
+      <h3>Encrypted &amp; guarded</h3>
+      <ul><li>Everything in L1</li><li>DNS-over-TLS</li><li>CrowdSec IPS</li></ul>
+    </div>
+    <div class="card">
+      <span class="pill p3">LEVEL 3</span>
+      <h3>Maximum</h3>
+      <ul><li>Everything in L2</li><li>DNSSEC + second DoT</li><li>Optional exit node</li></ul>
+    </div>
+  </div>
+
+  <div class="lower">
+    <div class="terminal">
+      <div><span class="prompt">&gt;</span> select level 2</div>
+      <div><span class="prompt">&gt;</span> review plain-language diff</div>
+      <div><span class="prompt">&gt;</span> apply with confirmation</div>
+      <div>&nbsp;</div>
+      <div>✓ snapshot saved</div>
+      <div>✓ 7 / 7 steps OK</div>
+      <div>✓ 157 menu links verified</div>
+      <div>✓ undo available</div>
+    </div>
+    <div class="scenario">
+      <h3>What it solves</h3>
+      <div><span class="yes">✔</span> Answers from official OPNsense docs</div>
+      <div><span class="yes">✔</span> Settings matched to CPU, RAM &amp; link speed</div>
+      <div><span class="yes">✔</span> Exact GUI paths before you click Apply</div>
+      <div><span class="no">✘</span> No public DNS fallbacks</div>
+      <div><span class="no">✘</span> No API keys inside config.xml</div>
+    </div>
+  </div>
+
+  <div class="question">Which level fits your network?
+    <small>Read the review, apply with one click, undo if you change your mind.</small>
+  </div>
+  <div class="foot">Explore the code &nbsp;→&nbsp; <span>github.com/danfreeus702/os-ai-opensense</span></div>
+</div>
+</body>
+</html>

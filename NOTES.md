@@ -528,3 +528,12 @@ and photos are in `docs/flyer/`; rendered PNG is at
 `images/opnsense-ai-flyer.png` (also copied to ~/Pictures) and was visually
 checked before saving. Rendered with headless Chromium because the browser
 desktop window was not visible for screenshots.
+
+### Beige illustrated flyer (2026-11-21)
+
+Second flyer variant matching the user's preferred "networking challenge" style:
+beige background, bold yellow rounded banner, navy outlines, an SVG thinking
+engineer and a simple router → switch → three-PC diagram with colour-coded
+lines. Text stays short and highly legible (same clarity as the reference).
+Rendered at 1200×1240; source `docs/flyer/flyer-beige.html`, PNG
+`images/opnsense-ai-flyer-beige.png` and `~/Pictures/`.
