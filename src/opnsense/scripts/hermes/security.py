@@ -55,11 +55,22 @@ def load():
 
 
 def save(tree):
-    """Write atomically so a failed write cannot corrupt the firewall config."""
+    """Write atomically, preserving the exact mode/owner of config.xml.
+
+    OPNsense's web GUI runs as wwwonly and must be able to READ config.xml.
+    Production uses 0644 root:wheel. A plain ElementTree write creates a new
+    file with umask-derived mode (0640), which breaks the GUI with
+    'flock(): Argument #1 ($stream) must be of type resource, false given'.
+    Always copy the original stat before replacing.
+    """
+    st = os.stat(CONF)
     tmp = CONF + ".hermes-tmp"
     tree.write(tmp, encoding="utf-8", xml_declaration=True)
+    os.chmod(tmp, st.st_mode & 0o7777)
+    os.chown(tmp, st.st_uid, st.st_gid)
     os.replace(tmp, CONF)
-    log.info("config.xml written atomically")
+    log.info("config.xml written atomically (mode %o uid %d gid %d)" %
+             (st.st_mode & 0o777, st.st_uid, st.st_gid))
 
 
 def ensure(parent, tag):
