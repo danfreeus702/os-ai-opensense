@@ -544,3 +544,8 @@ Rendered at 1200×1240; source `docs/flyer/flyer-beige.html`, PNG
 - Slightly heavier type: Segoe UI with weight 500 body / 600 lists / 800 headings.
 - Tighter layout: panel gaps 22→14px, row margins 22→16px, card padding trimmed.
 - Final PNG 1200×1210 at `images/opnsense-ai-flyer-beige.png` and `~/Pictures/`.
+
+#### Flyer: GitHub address enlarged (approved)
+
+Footer repo URL increased from 16px to 19px; final 1200×1210 PNG at
+`images/opnsense-ai-flyer-beige.png` and `~/Pictures/`.
