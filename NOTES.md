@@ -265,3 +265,50 @@ config.xml valid `644 root:wheel`, configd running, browser console clean.
 
 Note: pf displays well-known ports by NAME (`domain`, `https`, `domain-s`) —
 grepping pfctl output for numeric ports gives false negatives.
+
+## 2026-11-21 — Official plugin packaging validated (make package)
+
+Prepared a real OPNsense plugins checkout layout on `.50` (FreeBSD 15, matching
+OPNsense 26.7):
+
+- Sparse shallow clone of `github.com/opnsense/plugins` (`Mk`, `net`, `Templates`)
+  at `/tmp/opnsense-plugins`.
+- Directory `/tmp/opnsense-plugins/net/ai-opensense/` with our `Makefile`,
+  `pkg-descr` and `src/` (27 files).
+
+Makefile corrections discovered during the build:
+
+- `PLUGIN_NAME` must be `ai-opensense`, NOT `os-ai-opensense` — the build
+  prepends `os-` via `PLUGIN_PREFIX`, so the old value would have produced
+  `os-os-ai-opensense`.
+- `PLUGIN_DEVEL` must be explicitly EMPTY — the plugins repo's `devel.mk` sets
+  it to `yes` by default, producing an unwanted `-devel` suffix.
+- Maintainer set to `casainspector66@gmail.com`.
+- Sparse checkout must include `Templates/` or `make package` fails with
+  "Templates/version: No such file or directory".
+
+Result: `make package` SUCCEEDED:
+
+```
+>>> Staging files for os-ai-opensense-0.1_1... done
+>>> Packaging files for os-ai-opensense-0.1_1:
+file sizes/checksums [28]: . done
+packing files [28]: . done
+```
+
+Package: `os-ai-opensense-0.1_1.pkg` (29,821 bytes), metadata verified:
+
+- Name `os-ai-opensense`, Origin `opnsense/os-ai-opensense`
+- Architecture `FreeBSD:15:amd64`, ABI `26.7`, Category `net`
+- Maintainer `casainspector66@gmail.com`
+- 28 payload files including all controllers, models, views, scripts,
+  configd actions, templates and `/usr/local/opnsense/version/ai-opensense`.
+
+Test-installed with `pkg add` on `.50`: extracted cleanly, stopped/started
+configd, reloaded templates (`Reloading template OPNsense/AIOpenSense: OK`).
+`pkg info os-ai-opensense` confirms it is now a managed package. GUI smoke test
+after install: 3 wizard cards, 8 comparison rows, zero console errors.
+
+The built .pkg is kept locally in the repo root (gitignored via `*.pkg`).
+To submit officially: fork `opnsense/plugins`, add `net/ai-opensense/`, and
+open a PR; OPNsense maintainers review/sign/publish to the package repo.
