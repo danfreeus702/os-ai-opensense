@@ -194,3 +194,34 @@ that keeps a corporate security team from rejecting an AI-driven wizard.
 
 Keep the existing market positioning until both are shipped and tested; then
 revisit the corporate pitch.
+
+## 2026-11-21 — Renamed plugin to os-ai-opensense
+
+All plugin-specific "Hermes" identifiers were renamed to `AIOpenSense` /
+`aiopensense` (195 references across code and docs). External references to
+the separate Hermes Agent on `.153` (`~/.hermes`, `hermes-gateway`) were left
+untouched. Renames:
+
+- Package `os-hermes` -> `os-ai-opensense`; Makefile comment/pkg-descr updated.
+- MVC namespace `OPNsense\Hermes` -> `OPNsense\AIOpenSense`; controller/model/
+  view/service directories and `Hermes.xml/.php` -> `AIOpenSense.xml/.php`.
+- URLs `/ui/hermes/*` -> `/ui/aiopensense/*`, `/api/hermes/*` -> `/api/aiopensense/*`;
+  ACL patterns and menu entries updated.
+- Scripts `scripts/hermes` -> `scripts/aiopensense`; configd actions file
+  `actions_hermes.conf` -> `actions_aiopensense.conf`; command prefix
+  `configctl hermes` -> `configctl aiopensense`.
+- Config mount `//OPNsense/hermes` -> `//OPNsense/aiopensense`; key
+  `/conf/hermes.key` -> `/conf/aiopensense.key`; log
+  `/var/log/hermes-security.log` -> `/var/log/aiopensense-security.log`.
+- UI branding now "OPNsense AI" / "OPNsense AI - Security Wizard".
+
+Deployment to `.50` removed all old paths, installed new ones, migrated the
+`<hermes>` config node to `<aiopensense>` (settings and applied_level preserved)
+and copied the key to the new path. Verified: 13 configd actions, all 3 wizard
+levels re-tested via the NEW URL (`/ui/aiopensense/security/`) — L1/L2/L3 all
+success with 0 failures, correct level markers; old paths gone; config.xml
+valid 644 root:wheel; PHP + Python lint clean; LLM path `RENAMED_OK`; zero
+browser console errors.
+
+GitHub repo URL to update manually to:
+https://github.com/danfreeus702/os-ai-opensense (rename in GitHub settings).
