@@ -389,3 +389,22 @@ Final verification after rebuild + clean reinstall on VM 304:
 - **Final verification:** plugin menu shows all 3 entries (Security Wizard / AI Assistant / Configuration Guides); L1 → L2 → L3 re-applied with zero failures and correct level markers 1/2/3; Power → Reboot and Power → Power Off confirmation pages load (not executed).
 
 **Summary of 3 repeat runs:** 471 menu-link visits total, zero plugin-related errors, zero console errors, no code changes required. Only environment note: the firmware update check cannot reach the mirror from the isolated test network.
+
+## 2026-11-21 — AI Assistant page text unreadable (fixed)
+
+User reported the AI Assistant menu page looked blank / fonts unreadable. It was
+actually rendering, but the welcome text inherited the dark theme's white text
+colour while the chat panel has a white (`#fcfcfc`) inline background — white on
+white. Root cause: `index.volt` never closed `.box-header`, so `#chat-messages`
+was nested inside the header and inherited its colour.
+
+Fix in `src/opnsense/mvc/app/views/OPNsense/AIOpenSense/index.volt`:
+- closed the missing `</div>` for `.box-header`;
+- added explicit `#chat-messages` text colours (`#333`, muted `#666`, error `#a00`)
+  so chat text stays readable in both light and dark themes.
+
+Rebuilt and reinstalled on VM 304. Verified: `#chat-messages` is now a direct
+child of `.box` (not `.box-header`), computed text colour `rgb(51,51,51)` on
+`rgb(252,252,252)` background, and a screenshot confirms the welcome message is
+clearly legible. Smoke-tested all 3 plugin pages — titles/content load, zero
+console errors.

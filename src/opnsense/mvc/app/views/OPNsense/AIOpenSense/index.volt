@@ -82,6 +82,13 @@ $(document).ready(function() {
 });
 </script>
 
+<style>
+    /* The theme's dark text colour is unreadable on the chat panel's light background. */
+    #chat-messages, #chat-messages .chat-text { color: #333 !important; }
+    #chat-messages .text-muted { color: #666 !important; }
+    #chat-messages .chat-err .chat-text { color: #a00 !important; }
+</style>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
@@ -92,6 +99,7 @@ $(document).ready(function() {
                         <a href="/ui/aiopensense/guides/" class="btn btn-default btn-sm">
                             <span class="glyphicon glyphicon-book"></span> Guides
                         </a>
+                    </div>
                 </div>
                 <div id="settings-panel" class="box-body" style="display:none; background:#f5f5f5; border-bottom:1px solid #ddd; padding:12px;">
                     <div class="row">
