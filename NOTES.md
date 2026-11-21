@@ -494,3 +494,27 @@ Final verification: PHP lint clean, guide list and detail pages correct, full
 157-link menu sweep with zero anomalies and zero console errors, wizard preview
 10 rows for L3 plus apply/undo, Docs button URL correct, Offline Help results
 shown, Send degrades gracefully without an API key.
+
+## 2026-11-21 — Installable images for other hardware
+
+Produced two artifacts from the fully-upgraded VM 304 (OPNsense 26.7.9_3 with
+`os-ai-opensense-0.1_1`):
+
+1. **`opnsense-ai.img`** — 20 GB raw disk image (GPT: 260 MB EFI, 512 KB
+   freebsd-boot, 20 GB UFS). Exported from `/dev/pve/vm-304-disk-1` with
+   `qemu-img convert -O raw -S 4096`, compressed for transfer, restored as a
+   sparse file locally. SHA-256 `2c6cff6e4c632aef5f1a299152ef9026eaa5a0784ad9d75f072b29d236075141`.
+   Written to disk with `dd` it boots on x86-64 UEFI hardware; first boot should
+   reset the LAN IP because it is set to 192.168.50.3/24 for the test lab.
+2. **`opnsense-ai-installer.iso`** — remastered official OPNsense 26.7 DVD
+   installer (downloaded from `pkg.opnsense.org`, SHA-256 of source
+   `1efd5dc9fa12a1f93571183fe5e3823e22e332872de8417fafb5e4e4d48d5dcd`). Added
+   `os-ai-opensense-0.1_1.pkg`, `install-plugin.sh` and `README-OPNsenseAI.txt`
+   at the ISO root with xorriso `-boot_image any keep`. Output SHA-256
+   `dddb86b5c6c77a8abada82dea1ba057f922385ac8e63600a93d187a09ddbd97b`.
+   Verified El Torito catalog and both boot images are preserved and the three
+   added files are present. The installer installs 26.7 base; upgrade to the
+   latest point release, then run `sh /mnt/cdrom/install-plugin.sh`.
+
+Both files are saved in `images/` in the repo (gitignored — too large to commit)
+and copied to `/home/daniel/Downloads/Software/`.

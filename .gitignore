@@ -7,3 +7,6 @@ work/
 analysis/
 __pycache__/
 *.pyc
+
+# Build artifacts (large, local only)
+images/
