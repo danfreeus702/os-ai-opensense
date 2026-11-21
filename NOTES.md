@@ -375,3 +375,9 @@ Final verification after rebuild + clean reinstall on VM 304:
 - **Update software check:** System → Firmware → Updates → "Check for updates" returned *"Could not find the repository on the selected mirror."* The VM is on the isolated `vmbr50` test network with no internet route, so this is an environment limitation, not a plugin or GUI fault. No Update/Upgrade action was performed.
 - **Menu sweep:** all 157 links visited. First pass flagged 9 core OPNsense pages with empty bodies (2 navigation timeouts). All 9 re-checked individually and loaded correctly — transient browser load timing, not real failures.
 - **Result:** zero plugin-related errors; no code changes needed. Reboot/Power Off pages opened only, not executed.
+
+### Repeat run 2 (2026-11-21) — update check + full menu sweep
+
+- **Update software check:** same *"Could not find the repository on the selected mirror"* result (isolated test network, no internet route). No Update/Upgrade action performed.
+- **Menu sweep:** all 157 links visited with a 260 ms settle delay per page to avoid false negatives from in-flight loads. Zero anomalies, zero console errors.
+- **Result:** clean; no code changes needed. Reboot/Power Off pages opened only, not executed.
