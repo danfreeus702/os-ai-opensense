@@ -381,3 +381,11 @@ Final verification after rebuild + clean reinstall on VM 304:
 - **Update software check:** same *"Could not find the repository on the selected mirror"* result (isolated test network, no internet route). No Update/Upgrade action performed.
 - **Menu sweep:** all 157 links visited with a 260 ms settle delay per page to avoid false negatives from in-flight loads. Zero anomalies, zero console errors.
 - **Result:** clean; no code changes needed. Reboot/Power Off pages opened only, not executed.
+
+### Repeat run 3 (2026-11-21) — update check + full menu sweep (final)
+
+- **Update software check:** same *"Could not find the repository on the selected mirror"* result (isolated test network, no internet route). No Update/Upgrade action performed.
+- **Menu sweep:** all 157 links visited with settle delay. Zero anomalies, zero console errors.
+- **Final verification:** plugin menu shows all 3 entries (Security Wizard / AI Assistant / Configuration Guides); L1 → L2 → L3 re-applied with zero failures and correct level markers 1/2/3; Power → Reboot and Power → Power Off confirmation pages load (not executed).
+
+**Summary of 3 repeat runs:** 471 menu-link visits total, zero plugin-related errors, zero console errors, no code changes required. Only environment note: the firmware update check cannot reach the mirror from the isolated test network.
