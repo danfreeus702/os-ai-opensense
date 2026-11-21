@@ -518,3 +518,13 @@ Produced two artifacts from the fully-upgraded VM 304 (OPNsense 26.7.9_3 with
 
 Both files are saved in `images/` in the repo (gitignored — too large to commit)
 and copied to `/home/daniel/Downloads/Software/`.
+
+## 2026-11-21 — Graphical flyer
+
+Produced a 1200×1600 portrait flyer for the plugin: soft slate/teal palette,
+Unsplash server-room / circuit-board / patch-panel / datacentre photos, three
+security-level cards, feature grid, stats strip and GitHub footer. Source HTML
+and photos are in `docs/flyer/`; rendered PNG is at
+`images/opnsense-ai-flyer.png` (also copied to ~/Pictures) and was visually
+checked before saving. Rendered with headless Chromium because the browser
+desktop window was not visible for screenshots.

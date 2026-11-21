@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OPNsense AI — Security Wizard flyer</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    width: 1200px;
+    background: #0e1623;
+    color: #e7eef5;
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .hero {
+    height: 560px;
+    position: relative;
+    padding: 64px 70px;
+    background-image: linear-gradient(100deg, rgba(12,22,34,.97) 0%, rgba(14,28,42,.90) 45%, rgba(16,34,48,.55) 100%), url('flyer-assets/photo-1558494949-ef010cbdcc31.jpg');
+    background-size: cover;
+    background-position: center;
+    border-bottom: 1px solid rgba(127,209,193,.18);
+  }
+  .badge {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #9fd8cc;
+    border: 1px solid rgba(159,216,204,.4);
+    border-radius: 999px;
+    padding: 8px 16px;
+    margin-bottom: 26px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 82px;
+    line-height: .98;
+    font-weight: 700;
+    letter-spacing: -.04em;
+  }
+  h1 span { color: #7fd1c1; display: block; font-size: 66px; font-weight: 500; letter-spacing: -.03em; margin-top: 6px; }
+  .tagline { margin: 26px 0 0; font-size: 25px; line-height: 1.45; color: #cfdce7; max-width: 700px; font-weight: 400; }
+  .chips { margin-top: 30px; display: flex; gap: 12px; }
+  .chip { font-size: 15px; color: #d8e6ef; background: rgba(127,209,193,.10); border: 1px solid rgba(127,209,193,.28); padding: 9px 16px; border-radius: 8px; }
+
+  .stats { display: flex; background: #142233; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .stat { flex: 1; padding: 26px 30px; border-right: 1px solid rgba(255,255,255,.06); }
+  .stat:last-child { border-right: none; }
+  .stat b { display: block; font-size: 34px; font-weight: 650; color: #f2c894; letter-spacing: -.02em; }
+  .stat small { display: block; margin-top: 4px; font-size: 14px; color: #9fb2c4; letter-spacing: .06em; text-transform: uppercase; }
+
+  .section { padding: 46px 70px 8px; }
+  .kicker { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: #7fd1c1; margin-bottom: 10px; }
+  h2 { margin: 0 0 28px; font-size: 32px; font-weight: 600; letter-spacing: -.02em; }
+  .levels { display: flex; gap: 18px; }
+  .level { flex: 1; background: #16263a; border: 1px solid rgba(255,255,255,.07); border-radius: 16px; padding: 24px 24px 26px; }
+  .level .n { font-size: 13px; letter-spacing: .18em; color: #9fd8cc; text-transform: uppercase; }
+  .level h3 { margin: 10px 0 12px; font-size: 23px; font-weight: 650; }
+  .level p { margin: 0; font-size: 16px; line-height: 1.55; color: #b8c9d8; }
+  .level.l1 { border-top: 4px solid #7fd1c1; }
+  .level.l2 { border-top: 4px solid #9fb8e8; }
+  .level.l3 { border-top: 4px solid #f2c894; }
+
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 26px; margin-top: 4px; }
+  .feature { display: flex; gap: 14px; align-items: flex-start; font-size: 17px; color: #cbd9e6; line-height: 1.5; }
+  .feature .dot { width: 9px; height: 9px; border-radius: 50%; background: #7fd1c1; margin-top: 9px; flex: none; }
+
+  .footer {
+    margin-top: 40px;
+    padding: 0 70px 52px;
+    display: flex;
+    gap: 28px;
+    align-items: center;
+  }
+  .footer .copy { flex: 1; }
+  .footer .repo { font-size: 25px; color: #7fd1c1; font-weight: 600; word-break: break-all; }
+  .footer .fine { margin-top: 8px; font-size: 14px; color: #90a5b8; line-height: 1.5; }
+  .thumbs { display: flex; gap: 12px; }
+  .thumb { width: 168px; height: 104px; border-radius: 12px; background-size: cover; background-position: center; border: 1px solid rgba(255,255,255,.10); }
+  .credit { padding: 0 70px 28px; font-size: 11px; color: #6f8497; letter-spacing: .03em; }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div class="badge">Open source &nbsp;•&nbsp; OPNsense 26.7</div>
+    <h1>OPNsense AI<span>Security Wizard</span></h1>
+    <p class="tagline">A real firewall, made simple. Three safe hardening tiers, an assistant that cites the official docs, and a one-click way back if anything goes wrong.</p>
+    <div class="chips">
+      <div class="chip">L1 → L2 → L3</div>
+      <div class="chip">Docs-grounded answers</div>
+      <div class="chip">Hardware-aware</div>
+      <div class="chip">One-click undo</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>40</b><small>commits</small></div>
+    <div class="stat"><b>157</b><small>menu links tested</small></div>
+    <div class="stat"><b>2</b><small>fresh VMs validated</small></div>
+    <div class="stat"><b>0</b><small>failed applies</small></div>
+  </div>
+
+  <div class="section">
+    <div class="kicker">Pick a level. Review. Apply.</div>
+    <h2>Security that fits the hardware you actually have</h2>
+    <div class="levels">
+      <div class="level l1">
+        <div class="n">Level 1</div>
+        <h3>Foundations</h3>
+        <p>Network-wide ad blocking, a local DNS cache, and ClamAV antivirus — the everyday baseline.</p>
+      </div>
+      <div class="level l2">
+        <div class="n">Level 2</div>
+        <h3>Encrypted &amp; guarded</h3>
+        <p>Everything in L1, plus DNS-over-TLS and CrowdSec collaborative intrusion prevention.</p>
+      </div>
+      <div class="level l3">
+        <div class="n">Level 3</div>
+        <h3>Maximum</h3>
+        <p>Everything in L2, plus DNSSEC, a second encrypted upstream, and an optional Tailscale exit node.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="kicker">Built for real life</div>
+    <h2>No guesswork, no leaks, no lock-in</h2>
+    <div class="features">
+      <div class="feature"><span class="dot"></span><span>Answers grounded in <b>docs.opnsense.org</b>, with a one-click docs search.</span></div>
+      <div class="feature"><span class="dot"></span><span>Recommendations tuned to CPU, memory, disk and link speeds.</span></div>
+      <div class="feature"><span class="dot"></span><span>Plain-language change preview with exact GUI paths before applying.</span></div>
+      <div class="feature"><span class="dot"></span><span>Automatic config snapshot and one-click undo after every apply.</span></div>
+      <div class="feature"><span class="dot"></span><span>Offline help index works even when the lab has no internet.</span></div>
+      <div class="feature"><span class="dot"></span><span>Keys stay in a root-only file — never in config.xml or backups.</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="copy">
+      <div class="kicker">Explore the code</div>
+      <div class="repo">github.com/danfreeus702<br>os-ai-opensense</div>
+      <div class="fine">Native OPNsense plugin • PHP / Python / configd • Built and tested on 26.7.9</div>
+    </div>
+    <div class="thumbs">
+      <div class="thumb" style="background-image:url('flyer-assets/photo-1518770660439-4636190af475.jpg')"></div>
+      <div class="thumb" style="background-image:url('flyer-assets/photo-1544197150-b99a580bb7a8.jpg')"></div>
+      <div class="thumb" style="background-image:url('flyer-assets/photo-1573164713988-8665fc963095.jpg')"></div>
+    </div>
+  </div>
+  <div class="credit">Hardware photography via Unsplash. Designed for a soft, low-glare viewing experience.</div>
+</body>
+</html>
