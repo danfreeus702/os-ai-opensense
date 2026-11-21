@@ -259,6 +259,49 @@ def action_firewall_dot():
     return _firewall_rule("tcp", "853", "AIOpenSense DoT (TCP 853)")
 
 
+def action_clamav():
+    """Enable ClamAV with the exact production profile."""
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    general = ensure(ensure(opnsense(tree), "clamav"), "general")
+    for k, v in PROD_CLAMAV.items():
+        ensure(general, k).text = v
+    save(tree)
+    return ok("ClamAV enabled (freshclam, TCP scan, 100M/25M limits)")
+
+
+def action_crowdsec():
+    """Enable CrowdSec with the exact production profile."""
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    general = ensure(ensure(opnsense(tree), "crowdsec"), "general")
+    for k, v in PROD_CROWDSEC.items():
+        ensure(general, k).text = v
+    save(tree)
+    return ok("CrowdSec enabled (agent, LAPI 127.0.0.1:8080, firewall bouncer, rules)")
+
+
+def action_record_level():
+    """Persist the applied level in config.xml for the wizard status API."""
+    level = '0'
+    try:
+        level = open('/tmp/aiopensense-applied-level').read().strip()
+    except OSError:
+        pass
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    root = tree.getroot()
+    node = root.find('OPNsense/aiopensense')
+    if node is None:
+        node = ET.SubElement(opnsense(tree), 'aiopensense')
+    ensure(node, 'security_level').text = str(level)
+    save(tree)
+    return ok("recorded applied level " + str(level))
+
+
 def action_tailscale():
     """
     Production stores Tailscale at <OPNsense><tailscale><settings>:
