@@ -224,6 +224,22 @@ def action_firewall():
     return ok("Added %d LAN egress rules (53/853/443)" % count)
 
 
+def action_record_level():
+    """Persist the applied level in config.xml for the wizard status API."""
+    level = sys.argv[2] if len(sys.argv) > 2 else '0'
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    root = tree.getroot()
+    hermes = root.find('OPNsense/hermes')
+    if hermes is None:
+        op = opnsense(tree)
+        hermes = ET.SubElement(op, 'hermes')
+    ensure(hermes, 'security_level').text = str(level)
+    save(tree)
+    return ok("recorded applied level " + str(level))
+
+
 def action_tailscale():
     """
     Production stores Tailscale at <OPNsense><tailscale><settings>:
@@ -250,6 +266,7 @@ ACTIONS = {
     "dot": action_dot,
     "firewall": action_firewall,
     "tailscale": action_tailscale,
+    "record_level": action_record_level,
 }
 
 

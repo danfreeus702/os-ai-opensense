@@ -62,12 +62,8 @@ class SecurityWizardController extends ApiControllerBase
             return !$r['ok'];
         });
 
-        // Record for statusAction()
-        file_put_contents(
-            '/var/log/hermes-security.log',
-            date('Y-m-d H:i:s') . ' INFO applied level ' . $level . "\n",
-            FILE_APPEND
-        );
+        // Persist for statusAction() via configd (writes config.xml as root)
+        $this->runConfigd('record_level');
 
         return [
             'status' => count($failed) === 0 ? 'ok' : 'partial',
@@ -79,19 +75,13 @@ class SecurityWizardController extends ApiControllerBase
         ];
     }
 
-    /** Last applied level — read from the audit log (no model dependency). */
+    /** Last applied level — read config.xml directly (works for wwwonly). */
     public function statusAction()
     {
         $level = '0';
-        $log = '/var/log/hermes-security.log';
-        if (file_exists($log)) {
-            $lines = file($log, FILE_IGNORE_NEW_LINES);
-            foreach (array_reverse($lines ?: []) as $line) {
-                if (preg_match('/applied level (\d)/', $line, $m)) {
-                    $level = $m[1];
-                    break;
-                }
-            }
+        $xml = @simplexml_load_file('/conf/config.xml');
+        if ($xml !== false && isset($xml->OPNsense->hermes->security_level)) {
+            $level = (string)$xml->OPNsense->hermes->security_level;
         }
         return ['status' => 'ok', 'applied_level' => $level];
     }
