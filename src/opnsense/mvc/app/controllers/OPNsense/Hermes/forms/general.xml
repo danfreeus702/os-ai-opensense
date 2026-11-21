@@ -5,7 +5,7 @@
       <visibility>
         <condition type="FieldBool" ensureIfTrue="1">
           <if field="enabled">
-            < equalities>
+            <equalities>
               <eq>1</eq>
             </equalities>
           </if>
