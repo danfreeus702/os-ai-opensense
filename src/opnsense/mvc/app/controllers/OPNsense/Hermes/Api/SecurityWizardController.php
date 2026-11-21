@@ -63,6 +63,7 @@ class SecurityWizardController extends ApiControllerBase
         });
 
         // Persist for statusAction() via configd (writes config.xml as root)
+        @file_put_contents('/tmp/hermes-applied-level', (string)$level);
         $this->runConfigd('record_level');
 
         return [

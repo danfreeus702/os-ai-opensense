@@ -226,7 +226,11 @@ def action_firewall():
 
 def action_record_level():
     """Persist the applied level in config.xml for the wizard status API."""
-    level = sys.argv[2] if len(sys.argv) > 2 else '0'
+    level = '0'
+    try:
+        level = open('/tmp/hermes-applied-level').read().strip()
+    except OSError:
+        pass
     tree = load()
     if isinstance(tree, int):
         return tree
