@@ -161,7 +161,7 @@ class LLMProvider
         $response = curl_exec($ch);
         $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
-        curl_close($ch);
+        // curl_close() is a no-op since PHP 8.0 and deprecated in 8.5 — omit it.
 
         if ($error) {
             throw new \Exception("{$label} provider connection error: {$error}");
