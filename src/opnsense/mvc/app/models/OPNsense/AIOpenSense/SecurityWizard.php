@@ -139,16 +139,16 @@ class SecurityWizard
         $steps[] = [
             'id' => 'firewall_dns',
             'title' => 'Allow DNS resolution (TCP/UDP 53)',
-            'action' => 'firewall',
-            'detail' => 'LAN → any, TCP/UDP 53, for local clients to reach Unbound.',
+            'action' => 'firewall-dns',
+            'detail' => 'Adds an explicit LAN → any pass rule for TCP/UDP 53 (idempotent).',
             'risk' => 'low',
         ];
         if ($level >= 2) {
             $steps[] = [
                 'id' => 'firewall_doh',
                 'title' => 'Allow DNS-over-HTTPS (TCP 443)',
-                'action' => 'firewall',
-                'detail' => 'LAN → any, TCP 443, for DoH upstream forwarding.',
+                'action' => 'firewall-doh',
+                'detail' => 'Adds an explicit LAN → any pass rule for TCP 443 (idempotent).',
                 'risk' => 'low',
             ];
         }
@@ -156,8 +156,8 @@ class SecurityWizard
             $steps[] = [
                 'id' => 'firewall_dot',
                 'title' => 'Allow DNS-over-TLS (TCP 853)',
-                'action' => 'firewall',
-                'detail' => 'LAN → any, TCP 853, for DoT upstream forwarding.',
+                'action' => 'firewall-dot',
+                'detail' => 'Adds an explicit LAN → any pass rule for TCP 853 (idempotent).',
                 'risk' => 'low',
             ];
         }

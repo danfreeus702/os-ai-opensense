@@ -200,95 +200,63 @@ def action_doh():
     return action_dot()
 
 
-def action_firewall():
-    """
-    Firewall rules live at <OPNsense><Firewall><Filter><rules><rule>.
-    Production already has 'Default allow LAN to any rule', which covers DNS,
-    DoT and DoH egress. Only add specific rules if that default is absent.
-    """
+def _firewall_rule(proto, port, description):
+    """Add one idempotent LAN pass rule. Never duplicates by description."""
     tree = load()
     if isinstance(tree, int):
         return tree
     fw = ensure(ensure(ensure(opnsense(tree), "Firewall"), "Filter"), "rules")
-    has_default = any((r.findtext("description") or "").startswith("Default allow LAN")
-                      for r in fw.findall("rule"))
-    if has_default:
-        return ok("Default allow LAN to any rule already present — no extra DNS rules needed")
-
-    specs = [
-        ("DNS", "53", "Allow LAN DNS (TCP/UDP 53)"),
-        ("TCP", "853", "Allow LAN DoT (TCP 853)"),
-        ("TCP", "443", "Allow LAN DoH (TCP 443)"),
-    ]
-    count = 0
-    for proto, port, desc in specs:
-        rule = ET.SubElement(fw, "rule")
-        fields = {
-            "enabled": "1", "statetype": "keep", "state-policy": "", "sequence": str(900 + count),
-            "action": "pass", "quick": "1", "interfacenot": "0", "interface": "lan",
-            "received-on-not": "0", "received-on": "", "direction": "in", "ipprotocol": "inet",
-            "protocol": proto if proto != "DNS" else "tcp", "icmptype": "", "icmp6type": "",
-            "source_net": "lan", "source_not": "0", "source_port": "",
-            "destination_net": "any", "destination_not": "0", "destination_port": port,
-            "divert-to": "", "gateway": "", "replyto": "", "disablereplyto": "0",
-            "log": "0", "allowopts": "0", "nosync": "0", "nopfsync": "0",
-            "statetimeout": "", "udp-first": "", "udp-multiple": "", "udp-single": "",
-            "max-src-nodes": "", "max-src-states": "", "max-src-conn": "", "max": "",
-            "max-src-conn-rate": "", "max-src-conn-rates": "", "max-pkt-rate-number": "",
-            "max-pkt-rate-seconds": "", "overload": "", "adaptivestart": "", "adaptiveend": "",
-            "prio": "", "set-prio": "", "set-prio-low": "", "tag": "", "tagged": "",
-            "tcpflags1": "", "tcpflags2": "", "tcpflags_any": "0", "categories": "",
-            "sched": "", "tos": "", "shaper1": "", "shaper2": "", "description": desc, "audit": "",
-        }
-        for k, v in fields.items():
-            ET.SubElement(rule, k).text = v
-        count += 1
+    for existing in fw.findall("rule"):
+        if (existing.findtext("description") or "") == description:
+            return ok("already present: " + description)
+    seq = 0
+    for r in fw.findall("rule"):
+        try:
+            seq = max(seq, int(r.findtext("sequence") or 0))
+        except ValueError:
+            pass
+    rule = ET.SubElement(fw, "rule")
+    fields = {
+        "enabled": "1", "statetype": "keep", "state-policy": "", "sequence": str(seq + 10),
+        "action": "pass", "quick": "1", "interfacenot": "0", "interface": "lan",
+        "received-on-not": "0", "received-on": "", "direction": "in", "ipprotocol": "inet",
+        "protocol": proto, "icmptype": "", "icmp6type": "",
+        "source_net": "lan", "source_not": "0", "source_port": "",
+        "destination_net": "any", "destination_not": "0", "destination_port": port,
+        "divert-to": "", "gateway": "", "replyto": "", "disablereplyto": "0",
+        "log": "0", "allowopts": "0", "nosync": "0", "nopfsync": "0",
+        "statetimeout": "", "udp-first": "", "udp-multiple": "", "udp-single": "",
+        "max-src-nodes": "", "max-src-states": "", "max-src-conn": "", "max": "",
+        "max-src-conn-rate": "", "max-src-conn-rates": "", "max-pkt-rate-number": "",
+        "max-pkt-rate-seconds": "", "overload": "", "adaptivestart": "", "adaptiveend": "",
+        "prio": "", "set-prio": "", "set-prio-low": "", "tag": "", "tagged": "",
+        "tcpflags1": "", "tcpflags2": "", "tcpflags_any": "0", "categories": "",
+        "sched": "", "tos": "", "shaper1": "", "shaper2": "",
+        "description": description, "audit": "",
+    }
+    for k, v in fields.items():
+        ET.SubElement(rule, k).text = v
     save(tree)
-    return ok("Added %d LAN egress rules (53/853/443)" % count)
+    return ok("added: " + description)
 
 
-def action_clamav():
-    """Enable ClamAV with the exact production profile."""
-    tree = load()
-    if isinstance(tree, int):
-        return tree
-    general = ensure(ensure(opnsense(tree), "clamav"), "general")
-    for k, v in PROD_CLAMAV.items():
-        ensure(general, k).text = v
-    save(tree)
-    return ok("ClamAV enabled (freshclam, TCP scan, 100M/25M limits)")
+def action_firewall():
+    """Legacy combined action — kept for compatibility, no longer used by wizard."""
+    return action_firewall_dns()
 
 
-def action_crowdsec():
-    """Enable CrowdSec with the exact production profile."""
-    tree = load()
-    if isinstance(tree, int):
-        return tree
-    general = ensure(ensure(opnsense(tree), "crowdsec"), "general")
-    for k, v in PROD_CROWDSEC.items():
-        ensure(general, k).text = v
-    save(tree)
-    return ok("CrowdSec enabled (agent, LAPI 127.0.0.1:8080, firewall bouncer, rules)")
+def action_firewall_dns():
+    a = _firewall_rule("tcp", "53", "AIOpenSense DNS TCP 53")
+    b = _firewall_rule("udp", "53", "AIOpenSense DNS UDP 53")
+    return a if a != b else a
 
 
-def action_record_level():
-    """Persist the applied level in config.xml for the wizard status API."""
-    level = '0'
-    try:
-        level = open('/tmp/aiopensense-applied-level').read().strip()
-    except OSError:
-        pass
-    tree = load()
-    if isinstance(tree, int):
-        return tree
-    root = tree.getroot()
-    aiopensense = root.find('OPNsense/aiopensense')
-    if aiopensense is None:
-        op = opnsense(tree)
-        aiopensense = ET.SubElement(op, 'aiopensense')
-    ensure(aiopensense, 'security_level').text = str(level)
-    save(tree)
-    return ok("recorded applied level " + str(level))
+def action_firewall_doh():
+    return _firewall_rule("tcp", "443", "AIOpenSense DoH (TCP 443)")
+
+
+def action_firewall_dot():
+    return _firewall_rule("tcp", "853", "AIOpenSense DoT (TCP 853)")
 
 
 def action_tailscale():
@@ -320,6 +288,9 @@ ACTIONS = {
     "record_level": action_record_level,
     "clamav": action_clamav,
     "crowdsec": action_crowdsec,
+    "firewall_dns": action_firewall_dns,
+    "firewall_doh": action_firewall_doh,
+    "firewall_dot": action_firewall_dot,
 }
 
 
