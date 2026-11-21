@@ -33,7 +33,7 @@ class ChatController extends ApiControllerBase
             );
 
             // Get AI response with the parsed configuration embedded
-            $aiResponse = $this->sendToOllama($message, $context, $parsed);
+            $aiResponse = $this->sendToLLM($message, $context, $parsed);
 
             return [
                 'status' => 'ok',
@@ -153,19 +153,22 @@ class ChatController extends ApiControllerBase
         return $plugins;
     }
 
-    private function sendToOllama($message, $context = null, $parsed = null)
+    private function sendToLLM($message, $context = null, $parsed = null)
     {
         $config = \OPNsense\Base\Config::load('OPNsense/Hermes');
         $general = $config->get('general');
+        $settings = \OPNsense\Hermes\LLMProvider::resolve($general);
 
-        $host = isset($general->ollama_host) ? (string)$general->ollama_host : 'http://127.0.0.1:11434';
-        $model = isset($general->ollama_model) ? (string)$general->ollama_model : 'llama3';
-        $systemPrompt = isset($general->system_prompt) ? (string)$general->system_prompt :
-            'You are Hermes, an AI assistant for OPNsense firewall administration.';
+        $systemPrompt = isset($general->system_prompt) && (string)$general->system_prompt !== ''
+            ? (string)$general->system_prompt
+            : 'You are Hermes, an AI assistant for OPNsense firewall administration.';
 
-        // Build context — use provided or fetch fresh
+        // Build context — use provided or fetch fresh. Users can disable this
+        // in settings when firewall metadata should not leave the appliance.
         $opnsenseContext = $context ?? $this->getOpnsenseContext();
-        $contextStr = $this->contextToString($opnsenseContext);
+        $contextStr = $settings['send_context'] === '0'
+            ? '(context disabled by administrator)'
+            : $this->contextToString($opnsenseContext);
 
         // Build parsed-configuration summary for the AI
         $parsedSummary = '';
@@ -203,57 +206,11 @@ class ChatController extends ApiControllerBase
             }
         }
 
-        $prompt = "{$systemPrompt}\n\n--- Current OPNsense State ---\n{$contextStr}\n--- End OPNsense State ---\n\n"
+        $userPrompt = "--- Current OPNsense State ---\n{$contextStr}\n--- End OPNsense State ---\n\n"
             . "User question: {$message}\n"
             . ($parsedSummary ?: "\n(No structured configuration parsed for this request.)\n");
 
-        $payload = json_encode([
-            'model' => $model,
-            'messages' => [
-                ['role' => 'user', 'content' => $prompt]
-            ],
-            'stream' => false,
-            'options' => [
-                'temperature' => 0.7,
-                'max_tokens' => 2048
-            ]
-        ]);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, rtrim($host, '/') . '/api/chat');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($payload)
-        ]);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
-        curl_close($ch);
-
-        if ($curlError) {
-            throw new \Exception("Ollama connection error: {$curlError}");
-        }
-
-        if ($httpCode !== 200) {
-            throw new \Exception("Ollama returned HTTP {$httpCode}: " . substr($response, 0, 200));
-        }
-
-        $result = json_decode($response, true);
-        if (isset($result['message']['content'])) {
-            return $result['message']['content'];
-        }
-
-        if (isset($result['error'])) {
-            throw new \Exception("Ollama error: " . $result['error']);
-        }
-
-        throw new \Exception('Unexpected Ollama response format');
+        return \OPNsense\Hermes\LLMProvider::chat($systemPrompt, $userPrompt, $settings);
     }
 
     private function contextToString($context)

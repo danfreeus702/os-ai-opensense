@@ -12,18 +12,33 @@
         </condition>
       </visibility>
     </field>
-    <field name="ollama_host" type="Input">
-      <label>Ollama API Host</label>
-      <description>URL of the Ollama server (e.g. http://127.0.0.1:11434 or http://ollama.lan:11434)</description>
-      <set help="Enter the full URL including http:// and port" />
-      <default>http://127.0.0.1:11434</default>
+    <field name="provider" type="Option">
+      <label>Cloud LLM Provider</label>
+      <description>OpenRouter is recommended. NVIDIA NIM is used automatically as fallback.</description>
+      <default>openrouter</default>
       <required>Y</required>
     </field>
-    <field name="ollama_model" type="Input">
-      <label>Ollama Model</label>
-      <description>Name of the Ollama model to use (e.g. llama3, mistral, codellama)</description>
-      <default>llama3</default>
+    <field name="api_endpoint" type="Input">
+      <label>API Endpoint (optional)</label>
+      <description>Leave blank to use the provider preset endpoint.</description>
+      <required>N</required>
+    </field>
+    <field name="model" type="Input">
+      <label>Model (optional)</label>
+      <description>Leave blank to use the provider preset model.</description>
+      <required>N</required>
+    </field>
+    <field name="api_key_file" type="Input">
+      <label>API Key File</label>
+      <description>Root-only file containing the provider API key. Never paste keys into the GUI or config.xml.</description>
+      <default>/conf/hermes.key</default>
       <required>Y</required>
+    </field>
+    <field name="send_context" type="BooleanField">
+      <label>Send firewall context</label>
+      <description>Include a small, non-sensitive snapshot (rule counts, interface names, gateway IPs) with requests. Disable to keep all firewall metadata local.</description>
+      <default>1</default>
+      <required>N</required>
     </field>
     <field name="system_prompt" type="Textarea">
       <label>System Prompt</label>

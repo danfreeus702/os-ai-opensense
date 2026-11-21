@@ -12,7 +12,11 @@ Hermes is a native OPNsense plugin that embeds an AI chat assistant into the fir
 
 **Plugin identifier:** `os-hermes`
 
-**LLM backend:** Ollama (local `127.0.0.1:11434` or remote reachable host). Model is configurable; default `llama3` or `llama3.1`.
+**LLM backend:** Cloud, OpenAI-compatible `/chat/completions`. Default provider
+is **OpenRouter** (`nvidia/nemotron-3.5-lightning:free`) with automatic fallback
+to **NVIDIA NIM** (`deepseek-ai/deepseek-v4.1-flash`). Local/Ollama is not used.
+API keys are read from a root-only file (`/conf/hermes.key`), never from
+`config.xml`.
 
 ---
 
@@ -40,9 +44,9 @@ Hermes is a native OPNsense plugin that embeds an AI chat assistant into the fir
 │  └─────────────┴──────────────┴────────────┘    │
 │                    ↓ cURL                        │
 ├─────────────────────────────────────────────────┤
-│              Ollama API (external)              │
-│  POST /api/chat  ←  prompt + context            │
-│  ←  response (JSON with message.content)        │
+│       Cloud LLM (OpenRouter → NVIDIA fallback)  │
+│  POST /chat/completions ← system + user msgs     │
+│  ← choices[0].message.content                    │
 ├─────────────────────────────────────────────────┤
 │         OPNsense Backend (read-only)            │
 │  /conf/config.xml  ←  current firewall state    │

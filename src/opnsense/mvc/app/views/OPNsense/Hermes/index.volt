@@ -8,8 +8,11 @@ $(document).ready(function() {
         success: function(data) {
             if (data && data.hermes && data.hermes.general) {
                 var g = data.hermes.general;
-                $('#hermes-ollama-host').val(g.ollama_host || 'http://127.0.0.1:11434');
-                $('#hermes-ollama-model').val(g.ollama_model || 'llama3');
+                $('#hermes-provider').val(g.provider || 'openrouter');
+                $('#hermes-endpoint').val(g.api_endpoint || '');
+                $('#hermes-model').val(g.model || '');
+                $('#hermes-keyfile').val(g.api_key_file || '/conf/hermes.key');
+                $('#hermes-send-context').prop('checked', (g.send_context || '1') === '1');
                 $('#hermes-system-prompt').val(g.system_prompt || '');
                 $('#hermes-enabled').val(g.enabled || '1');
             }
@@ -50,8 +53,11 @@ $(document).ready(function() {
         var data = {
             general: {
                 enabled: $('#hermes-enabled').val(),
-                ollama_host: $('#hermes-ollama-host').val(),
-                ollama_model: $('#hermes-ollama-model').val(),
+                provider: $('#hermes-provider').val(),
+                api_endpoint: $('#hermes-endpoint').val(),
+                model: $('#hermes-model').val(),
+                api_key_file: $('#hermes-keyfile').val(),
+                send_context: $('#hermes-send-context').is(':checked') ? '1' : '0',
                 system_prompt: $('#hermes-system-prompt').val()
             }
         };
@@ -91,12 +97,27 @@ $(document).ready(function() {
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label>Ollama Host</label>
-                                <input type="text" id="hermes-ollama-host" class="form-control" value="http://127.0.0.1:11434" placeholder="http://127.0.0.1:11434">
+                                <label>Cloud Provider</label>
+                                <select id="hermes-provider" class="form-control">
+                                    <option value="openrouter">OpenRouter (recommended, NVIDIA fallback)</option>
+                                    <option value="nvidia">NVIDIA NIM (OpenRouter fallback)</option>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label>Model</label>
-                                <input type="text" id="hermes-ollama-model" class="form-control" value="llama3" placeholder="llama3">
+                                <label>API Endpoint <small>(blank = preset)</small></label>
+                                <input type="text" id="hermes-endpoint" class="form-control" placeholder="https://openrouter.ai/api/v1">
+                            </div>
+                            <div class="form-group">
+                                <label>Model <small>(blank = preset)</small></label>
+                                <input type="text" id="hermes-model" class="form-control" placeholder="nvidia/nemotron-3.5-lightning:free">
+                            </div>
+                            <div class="form-group">
+                                <label>API Key File</label>
+                                <input type="text" id="hermes-keyfile" class="form-control" value="/conf/hermes.key">
+                                <small class="text-muted">Root-only file with the provider key. Keys are never stored in config.xml.</small>
+                            </div>
+                            <div class="checkbox">
+                                <label><input type="checkbox" id="hermes-send-context" checked> Send firewall context with requests</label>
                             </div>
                             <div class="form-group">
                                 <label>System Prompt</label>
