@@ -461,3 +461,36 @@ graceful error with no console exceptions, and all plugin pages still load.
 Added `docs/OPNsense-Lite.md` — a draft design for a slimmed-down profile with a
 four-step setup, keep/simplify/hide/remove feature matrix, hardware-aware
 defaults, safety model, lite menu map and implementation phases.
+
+## 2026-11-21 — Rollback, offline help, plain-language diff + regression fixes
+
+Implemented the remaining recommendations:
+
+1. **Rollback point before every apply + one-click Undo.** `security.py` gained
+   `snapshot` and `undo` configd actions; snapshots are stored in
+   `/conf/aiopensense/snapshots/` (last path in `/conf/aiopensense/last-snapshot`,
+   five kept, mode 600). `applyAction()` now snapshots first and aborts if that
+   fails. Added `POST /api/aiopensense/securityWizard/undo` with explicit
+   confirmation and an "Undo last change" button. Verified: apply L1/L2/L3 with
+   zero failures, snapshot note shown, undo restored the previous level.
+2. **Offline help index.** Bundled `help-index.json` (12 curated topics with
+   summary, GUI path and doc URL) at `/usr/local/opnsense/data/aiopensense/`.
+   `GET /api/aiopensense/chat/help?q=...` searches it; the top matches are also
+   injected into the LLM prompt so answers work with no internet. Added an
+   "Offline Help" button. Verified results render in chat.
+3. **Plain-language diff + GUI paths.** `POST /api/aiopensense/securityWizard/preview`
+   returns before/after values, plain explanation, GUI path and doc link for each
+   step. The wizard renders it as a table before the Apply confirmation.
+
+Additional defects found and repaired during testing:
+- OPNsense 26.7 has no `Request::getParam()` — switched all uses to `getQuery()`.
+- Volt did not resolve array keys via dot notation, so guide names/IDs rendered
+  empty — switched to `guide['id']` style in both guide views.
+- Guide detail page instantiated an API controller without DI and crashed to
+  `crash_reporter.php` — rewrote `GuideController` to read `Guide::getGuides()`
+  directly and pass `guide`/`steps`/`stepIndex`/`currentStep` to the view.
+
+Final verification: PHP lint clean, guide list and detail pages correct, full
+157-link menu sweep with zero anomalies and zero console errors, wizard preview
+10 rows for L3 plus apply/undo, Docs button URL correct, Offline Help results
+shown, Send degrades gracefully without an API key.

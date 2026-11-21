@@ -15,7 +15,9 @@ Actions: enable_unbound, blocklist, doh, dnssec, dot, firewall, tailscale
 
 import os
 import sys
+import shutil
 import logging
+import subprocess
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
@@ -320,7 +322,59 @@ def action_tailscale():
     return ok("Tailscale exit node enabled in config; approve the node in Tailscale admin console")
 
 
+SNAPSHOT_DIR = "/conf/aiopensense/snapshots"
+LAST_SNAPSHOT = "/conf/aiopensense/last-snapshot"
+
+
+def action_snapshot():
+    """Save a timestamped config.xml copy before any wizard apply."""
+    os.makedirs(SNAPSHOT_DIR, mode=0o700, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    dst = os.path.join(SNAPSHOT_DIR, "config-%s.xml" % stamp)
+    try:
+        shutil.copy2(CONF, dst)
+        os.chmod(dst, 0o600)
+        with open(LAST_SNAPSHOT, "w") as handle:
+            handle.write(dst)
+        os.chmod(LAST_SNAPSHOT, 0o600)
+        # Keep only the five most recent snapshots.
+        snaps = sorted(
+            (os.path.join(SNAPSHOT_DIR, f) for f in os.listdir(SNAPSHOT_DIR) if f.endswith(".xml")),
+            reverse=True,
+        )
+        for old in snaps[5:]:
+            os.unlink(old)
+    except Exception as exc:
+        return fail("snapshot failed: %s" % exc)
+    return ok("config snapshot saved: %s" % dst)
+
+
+def action_undo():
+    """Restore the most recent snapshot after validating its XML."""
+    try:
+        with open(LAST_SNAPSHOT) as handle:
+            src = handle.read().strip()
+    except OSError:
+        return fail("no snapshot available")
+    if not src or not os.path.isfile(src):
+        return fail("snapshot file missing")
+    try:
+        ET.parse(src)
+        shutil.copy2(src, CONF)
+        os.chmod(CONF, 0o644)
+    except Exception as exc:
+        return fail("undo failed: %s" % exc)
+    try:
+        subprocess.run(["/usr/local/sbin/configctl", "filter", "reload"],
+                       timeout=30, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as exc:
+        log.warning("filter reload after undo failed: %s", exc)
+    return ok("configuration restored from %s" % src)
+
+
 ACTIONS = {
+    "snapshot": action_snapshot,
+    "undo": action_undo,
     "enable_unbound": action_enable_unbound,
     "blocklist": action_blocklist,
     "doh": action_doh,

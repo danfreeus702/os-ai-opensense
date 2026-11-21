@@ -37,7 +37,8 @@ class ChatController extends ApiControllerBase
             );
 
             // Get AI response with the parsed configuration embedded
-            $aiResponse = $this->sendToLLM($message, $context, $parsed);
+            $offlineHelp = $this->searchHelpIndex($message);
+            $aiResponse = $this->sendToLLM($message, $context, $parsed, $offlineHelp);
 
             return [
                 'status' => 'ok',
@@ -196,7 +197,51 @@ class ChatController extends ApiControllerBase
         return $plugins;
     }
 
-    private function sendToLLM($message, $context = null, $parsed = null)
+    /** Search the bundled offline documentation excerpts. */
+    public function helpAction()
+    {
+        $q = trim((string)$this->request->getQuery('q'));
+        return ['status' => 'ok', 'matches' => $this->searchHelpIndex($q, 4)];
+    }
+
+    private function searchHelpIndex($question, $limit = 3)
+    {
+        $file = '/usr/local/opnsense/data/aiopensense/help-index.json';
+        if (!file_exists($file)) {
+            return [];
+        }
+        $entries = json_decode((string)file_get_contents($file), true);
+        if (!is_array($entries)) {
+            return [];
+        }
+        $words = preg_split('/\W+/', strtolower((string)$question));
+        $words = array_values(array_filter($words, static function ($w) {
+            return strlen($w) > 2;
+        }));
+        if (!$words) {
+            return [];
+        }
+        $scored = [];
+        foreach ($entries as $entry) {
+            $hay = strtolower($entry['topic'] . ' ' . $entry['keywords'] . ' ' . $entry['summary']);
+            $score = 0;
+            foreach ($words as $word) {
+                if (strpos($hay, $word) !== false) {
+                    $score++;
+                }
+            }
+            if ($score > 0) {
+                $entry['score'] = $score;
+                $scored[] = $entry;
+            }
+        }
+        usort($scored, static function ($a, $b) {
+            return $b['score'] <=> $a['score'];
+        });
+        return array_slice($scored, 0, $limit);
+    }
+
+    private function sendToLLM($message, $context = null, $parsed = null, $offlineHelp = [])
     {
         $model = new \OPNsense\AIOpenSense\AIOpenSense();
         $general = $model->general;
@@ -262,7 +307,17 @@ class ChatController extends ApiControllerBase
             }
         }
 
-        $userPrompt = "--- Current OPNsense State ---\n{$contextStr}\n--- End OPNsense State ---\n\n"
+        $helpStr = '';
+        if (!empty($offlineHelp)) {
+            foreach ($offlineHelp as $entry) {
+                $helpStr .= "- " . $entry['topic'] . ": " . $entry['summary']
+                    . " (GUI: " . $entry['gui_path'] . "; docs: " . $entry['doc_url'] . ")\n";
+            }
+        }
+        $userPrompt = "--- Bundled OPNsense Documentation Excerpts (offline, use these first) ---\n"
+            . ($helpStr !== '' ? $helpStr : "(none matched)\n")
+            . "--- End Documentation Excerpts ---\n\n"
+            . "--- Current OPNsense State ---\n{$contextStr}\n--- End OPNsense State ---\n\n"
             . "User question: {$message}\n"
             . ($parsedSummary ?: "\n(No structured configuration parsed for this request.)\n");
 

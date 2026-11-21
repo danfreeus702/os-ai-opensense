@@ -60,6 +60,24 @@ $(document).ready(function() {
         window.open('https://docs.opnsense.org/search.html?q=' + encodeURIComponent(q), '_blank', 'noopener');
     });
 
+    $('#btn-help').on('click', function() {
+        var q = $('#chat-input').val().trim();
+        if (!q) q = $('.chat-user .chat-text').last().text().trim();
+        if (!q) { alert(t('Type a question first')); return; }
+        $.getJSON('/api/aiopensense/chat/help', {q: q}, function(data) {
+            if (!data.matches || !data.matches.length) {
+                addMessage('system', t('No offline guidance matched that question.'));
+                return;
+            }
+            var text = '';
+            $.each(data.matches, function(_, m) {
+                text += m.topic.toUpperCase() + ': ' + m.summary + '\nGUI: ' +
+                    m.gui_path + '\nDocs: ' + m.doc_url + '\n\n';
+            });
+            addMessage('system', text.trim());
+        });
+    });
+
     $('#btn-save-settings').on('click', function() {
         var data = {
             general: {
@@ -172,6 +190,9 @@ $(document).ready(function() {
                         <span class="input-group-btn">
                             <button type="button" id="btn-docs" class="btn btn-default" title="Search the official OPNsense documentation for this question">
                                 <span class="glyphicon glyphicon-book"></span> Docs
+                            </button>
+                            <button type="button" id="btn-help" class="btn btn-default" title="Search the bundled offline OPNsense help index">
+                                <span class="glyphicon glyphicon-question-sign"></span> Offline Help
                             </button>
                             <button type="button" id="btn-send" class="btn btn-primary">Send</button>
                         </span>

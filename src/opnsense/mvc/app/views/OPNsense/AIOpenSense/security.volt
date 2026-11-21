@@ -35,6 +35,7 @@
                 <h3 class="box-title" id="plan-title">Review plan</h3>
             </div>
             <div class="box-body" id="plan-body"></div>
+            <div class="box-body" id="preview-body" style="border-top:1px solid #2f3446;"></div>
             <div class="box-footer">
                 <label class="checkbox-inline">
                     <input type="checkbox" id="tailscale-opt"> Include Tailscale exit node (Level 3 only)
@@ -51,6 +52,12 @@
         <div class="box" id="result-box">
             <div class="box-header"><h3 class="box-title">Result</h3></div>
             <div class="box-body" id="result-body"></div>
+            <div class="box-footer">
+                <button type="button" class="btn btn-default" id="btn-undo">
+                    <span class="glyphicon glyphicon-backward"></span> Undo last change
+                </button>
+                <span id="snapshot-note" class="text-muted"></span>
+            </div>
         </div>
     </div>
 </div>
@@ -109,6 +116,29 @@ $(function () {
                 });
                 html += '</ol><p><em>' + d.plan.note + '</em></p>';
                 $('#plan-body').html(html);
+                loadPreview();
+            }
+        });
+    }
+
+    function loadPreview() {
+        var ts = $('#tailscale-opt').is(':checked') && selectedLevel === 3 ? '1' : '0';
+        $.ajax({
+            url: '/api/aiopensense/securityWizard/preview',
+            type: 'POST',
+            dataType: 'json',
+            data: { level: selectedLevel, tailscale_exit: ts },
+            success: function (d) {
+                if (d.status !== 'ok') return;
+                var html = '<h4>What will change</h4><table class="table table-condensed table-striped">' +
+                    '<thead><tr><th>Change</th><th>Before</th><th>After</th><th>Where in the GUI</th></tr></thead><tbody>';
+                $.each(d.changes, function (_, c) {
+                    html += '<tr><td><strong>' + c.title + '</strong><br><span class="text-muted">' +
+                        c.plain + '</span><br><a href="' + c.doc_url + '" target="_blank" rel="noopener">Official docs</a></td>' +
+                        '<td>' + c.before + '</td><td>' + c.after + '</td><td>' + c.gui_path + '</td></tr>';
+                });
+                html += '</tbody></table>';
+                $('#preview-body').html(html);
             }
         });
     }
@@ -117,7 +147,7 @@ $(function () {
     $('#tailscale-opt').on('change', loadPlan);
 
     $('#btn-apply').on('click', function () {
-        if (!confirm('Apply security level ' + selectedLevel + '? This will change firewall and DNS settings.')) return;
+        if (!confirm('Apply security level ' + selectedLevel + '? Review the change table above first. A rollback snapshot will be saved automatically.')) return;
         var ts = $('#tailscale-opt').is(':checked') && selectedLevel === 3 ? '1' : '0';
         $.ajax({
             url: '/api/aiopensense/securityWizard/apply',
@@ -127,6 +157,7 @@ $(function () {
             success: function (d) {
                 $('#result-panel').show();
                 $('#result-box').removeClass('box-success box-warning').addClass(d.status === 'ok' ? 'box-success' : 'box-warning');
+                if (d.snapshot) $('#snapshot-note').text(d.snapshot);
                 var html = '<p>' + d.message + '</p><ul>';
                 $.each(d.results || [], function (_, r) {
                     html += '<li>' + (r.ok ? '&#10003;' : '&#10007;') + ' ' + r.action +
@@ -134,6 +165,23 @@ $(function () {
                 });
                 html += '</ul>';
                 $('#result-body').html(html);
+            }
+        });
+    });
+
+    $('#btn-undo').on('click', function () {
+        if (!confirm('Restore the configuration from before the last change?')) return;
+        $.ajax({
+            url: '/api/aiopensense/securityWizard/undo',
+            type: 'POST',
+            dataType: 'json',
+            data: { confirm: 'yes' },
+            success: function (d) {
+                $('#result-panel').show();
+                $('#result-box').removeClass('box-success box-warning')
+                    .addClass(d.status === 'ok' ? 'box-success' : 'box-warning');
+                $('#result-body').html('<p>' + d.message + '</p><pre>' +
+                    (d.output || '') + '</pre>');
             }
         });
     });

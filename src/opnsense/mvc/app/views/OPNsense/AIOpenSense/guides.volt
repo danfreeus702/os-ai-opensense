@@ -29,20 +29,20 @@
                         <div class="box box-solid box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">
-                                    <span class="glyphicon glyphicon-{{ guide.icon }}"></span>
-                                    {{ guide.name }}
+                                    <span class="glyphicon glyphicon-{{ guide['icon'] }}"></span>
+                                    {{ guide['name'] }}
                                 </h3>
                             </div>
                             <div class="box-body">
-                                <p>{{ guide.description }}</p>
-                                <a href="/ui/aiopensense/guide/view/?id={{ guide.id }}"
+                                <p>{{ guide['description'] }}</p>
+                                <a href="/ui/aiopensense/guide/view/?id={{ guide['id'] }}"
                                    class="btn btn-primary btn-block">
                                     <span class="glyphicon glyphicon-play"></span> Start Guide
                                 </a>
                             </div>
                             <div class="box-footer">
                                 <small>
-                                    {{ guide.steps|length }} steps
+                                    {{ guide['steps']|length }} steps
                                 </small>
                             </div>
                         </div>

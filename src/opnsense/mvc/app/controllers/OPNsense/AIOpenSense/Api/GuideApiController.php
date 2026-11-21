@@ -24,7 +24,7 @@ class GuideApiController extends ApiControllerBase
      */
     public function getAction()
     {
-        $id = trim((string)$this->request->getParam('id'));
+        $id = trim((string)$this->request->getQuery('id'));
         if (empty($id)) {
             return ['status' => 'error', 'message' => 'Guide ID required'];
         }
@@ -46,8 +46,8 @@ class GuideApiController extends ApiControllerBase
      */
     public function suggestAction()
     {
-        $guideId = trim((string)$this->request->getParam('guideId'));
-        $stepId = trim((string)$this->request->getParam('stepId'));
+        $guideId = trim((string)$this->request->getQuery('guideId'));
+        $stepId = trim((string)$this->request->getQuery('stepId'));
 
         if (empty($guideId) || empty($stepId)) {
             return ['status' => 'error', 'message' => 'Guide ID and Step ID required'];
@@ -67,7 +67,7 @@ class GuideApiController extends ApiControllerBase
      */
     public function saveAction()
     {
-        $guideId = trim((string)$this->request->getParam('guideId'));
+        $guideId = trim((string)$this->request->getQuery('guideId'));
         if (empty($guideId)) {
             return ['status' => 'error', 'message' => 'Guide ID required'];
         }
@@ -99,7 +99,7 @@ class GuideApiController extends ApiControllerBase
      */
     public function progressAction()
     {
-        $guideId = trim((string)$this->request->getParam('guideId'));
+        $guideId = trim((string)$this->request->getQuery('guideId'));
         if (empty($guideId)) {
             return ['status' => 'error', 'message' => 'Guide ID required'];
         }

@@ -1,0 +1,86 @@
+[
+  {
+    "topic": "dns",
+    "keywords": "dns resolver unbound cache forward dot tls dnssec blocklist adblock",
+    "summary": "Unbound is the local DNS resolver. Enable it for a cache, add blocklists for ad blocking, and use DNS-over-TLS for encrypted upstream queries. DNSSEC validates answers but needs correct system time.",
+    "gui_path": "Services > Unbound DNS > General",
+    "doc_url": "https://docs.opnsense.org/manual/dns.html"
+  },
+  {
+    "topic": "dot",
+    "keywords": "dot dns over tls encrypted dns 853 cloudflare quad9 forward",
+    "summary": "OPNsense 26.7 supports DNS-over-TLS, not a native DoH type. Add an upstream on port 853 with TLS verification of the provider hostname (for example cloudflare-dns.com).",
+    "gui_path": "Services > Unbound DNS > DNS over TLS",
+    "doc_url": "https://docs.opnsense.org/manual/dns.html"
+  },
+  {
+    "topic": "firewall",
+    "keywords": "firewall rule allow block port lan wan policy",
+    "summary": "Rules are evaluated top-down; the first match wins. Add a LAN allow rule for the service port and keep the default block rule last.",
+    "gui_path": "Firewall > Rules > LAN",
+    "doc_url": "https://docs.opnsense.org/manual/firewall.html"
+  },
+  {
+    "topic": "nat",
+    "keywords": "nat port forward dstnat incoming rdp web server",
+    "summary": "A port forward maps an external WAN port to an internal address and port. Remember to add a matching WAN firewall rule allowing that port.",
+    "gui_path": "Firewall > NAT > Port Forward",
+    "doc_url": "https://docs.opnsense.org/manual/nat.html"
+  },
+  {
+    "topic": "dhcp",
+    "keywords": "dhcp kea dnsmasq lease pool range reservation",
+    "summary": "Enable one DHCP server only. Set a pool inside your LAN subnet and point clients at the firewall as DNS server.",
+    "gui_path": "Services > Kea DHCP > DHCPv4",
+    "doc_url": "https://docs.opnsense.org/manual/dhcp.html"
+  },
+  {
+    "topic": "clamav",
+    "keywords": "clamav antivirus virus scan freshclam malware",
+    "summary": "ClamAV scans files for malware. On small appliances use scheduled scans rather than on-access scanning to save memory and CPU.",
+    "gui_path": "Services > ClamAV > Scan",
+    "doc_url": "https://docs.opnsense.org/manual/clamav.html"
+  },
+  {
+    "topic": "crowdsec",
+    "keywords": "crowdsec intrusion prevention ips bouncer ban attackers",
+    "summary": "CrowdSec blocks hostile IPs using shared signals. Enable the agent, local API and firewall bouncer together.",
+    "gui_path": "Services > CrowdSec > Agents",
+    "doc_url": "https://docs.opnsense.org/manual/crowdsec.html"
+  },
+  {
+    "topic": "wireguard",
+    "keywords": "wireguard vpn tunnel peer exit node tailscale",
+    "summary": "WireGuard needs an instance, a peer with a public key, and an interface assignment. A Tailscale exit node additionally requires approval in the Tailscale admin console.",
+    "gui_path": "VPN > WireGuard > Instances",
+    "doc_url": "https://docs.opnsense.org/manual/vpnet.html#wireguard"
+  },
+  {
+    "topic": "interface",
+    "keywords": "interface lan wan ip address subnet gateway vlan nic",
+    "summary": "Assign WAN to the internet-facing NIC and LAN to the internal NIC. Set a static LAN address such as 192.168.1.1/24 and enable DHCP on LAN.",
+    "gui_path": "Interfaces > Assignments",
+    "doc_url": "https://docs.opnsense.org/manual/interfaces.html"
+  },
+  {
+    "topic": "backup",
+    "keywords": "backup restore snapshot config rollback undo",
+    "summary": "Download a configuration backup before major changes. The Security Wizard also saves its own snapshot and can undo the last apply.",
+    "gui_path": "System > Configuration > Backups",
+    "doc_url": "https://docs.opnsense.org/manual/backup.html"
+  },
+  {
+    "topic": "updates",
+    "keywords": "update firmware upgrade repository mirror check for updates",
+    "summary": "Check for updates before upgrading and read the release notes. An isolated test network cannot reach the package mirror.",
+    "gui_path": "System > Firmware > Updates",
+    "doc_url": "https://docs.opnsense.org/manual/updates.html"
+  },
+  {
+    "topic": "hardware",
+    "keywords": "hardware cpu memory ram disk intel nic performance sizing",
+    "summary": "For 2 GB RAM or less, keep the DNS cache small and skip antivirus scanning. More RAM allows ClamAV and CrowdSec together. Multi-core CPUs help encrypted DNS and VPN throughput.",
+    "gui_path": "System > Information > System",
+    "doc_url": "https://docs.opnsense.org/manual/system.html"
+  }
+]

@@ -5,36 +5,41 @@ class GuideController extends \OPNsense\Base\IndexController
 {
     public function indexAction()
     {
-        // Load guides list via API
-        $guidesApi = new \OPNsense\AIOpenSense\Api\GuideApiController();
-        $result = $guidesApi->listAction();
-        $guides = $result['guides'] ?? [];
-
-        $this->view->guides = $guides;
+        $this->view->guides = \OPNsense\AIOpenSense\Guide::getGuides();
         $this->view->pick('OPNsense/AIOpenSense/guides');
     }
 
     public function viewAction()
     {
-        $guideId = trim((string)$this->request->getParam('id'));
-        if (empty($guideId)) {
-            $this->FlashMessage->addError(__('Guide ID required'));
-            $this->redirect('/ui/aiopensense/guides/');
+        $guideId = trim((string)$this->request->getQuery('id'));
+        $guides = \OPNsense\AIOpenSense\Guide::getGuides();
+
+        $guide = null;
+        foreach ($guides as $candidate) {
+            if ($candidate['id'] === $guideId) {
+                $guide = $candidate;
+                break;
+            }
+        }
+        if ($guide === null) {
+            $this->response->redirect('/ui/aiopensense/guides/', true);
             return;
         }
 
-        // Load the guide with AI suggestions
-        $guidesApi = new \OPNsense\AIOpenSense\Api\GuideApiController();
-        $result = $guidesApi->getAction();
-
-        if ($result['status'] !== 'ok') {
-            $this->FlashMessage->addError($result['message'] ?? __('Failed to load guide'));
-            $this->redirect('/ui/aiopensense/guides/');
-            return;
+        $steps = $guide['steps'] ?? [];
+        $stepId = trim((string)$this->request->getQuery('step'));
+        $stepIndex = 0;
+        foreach ($steps as $index => $step) {
+            if ($step['id'] === $stepId) {
+                $stepIndex = $index;
+                break;
+            }
         }
 
-        $this->view->guide = $result['guide'];
-        $this->view->steps = $result['steps'];
+        $this->view->guide = $guide;
+        $this->view->steps = $steps;
+        $this->view->stepIndex = $stepIndex;
+        $this->view->currentStep = $steps[$stepIndex];
         $this->view->pick('OPNsense/AIOpenSense/guide');
     }
 }
