@@ -1,0 +1,6 @@
+# Secrets — never commit
+/conf/hermes.key
+*.key
+work/
+*.pkg
+*.txz
