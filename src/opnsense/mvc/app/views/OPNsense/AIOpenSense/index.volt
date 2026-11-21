@@ -83,10 +83,19 @@ $(document).ready(function() {
 </script>
 
 <style>
-    /* The theme's dark text colour is unreadable on the chat panel's light background. */
-    #chat-messages, #chat-messages .chat-text { color: #333 !important; }
-    #chat-messages .text-muted { color: #666 !important; }
-    #chat-messages .chat-err .chat-text { color: #a00 !important; }
+    /* Match the OPNsense menu palette: dark surface, light text, orange accent. */
+    #chat-messages,
+    #settings-panel {
+        background-color: #101218 !important;
+        color: #ececec !important;
+        border-bottom: 1px solid #2f3446 !important;
+    }
+    #chat-messages .chat-text { color: #ececec; }
+    #chat-messages .chat-user .chat-text { color: #ffb38a; }
+    #chat-messages .chat-sys .chat-text,
+    #chat-messages .text-muted { color: #b9b9b9; }
+    #chat-messages .chat-err .chat-text { color: #ff8a80; }
+    #chat-input::placeholder { color: #8a8f9c; }
 </style>
 
 <div class="container-fluid">
@@ -101,7 +110,7 @@ $(document).ready(function() {
                         </a>
                     </div>
                 </div>
-                <div id="settings-panel" class="box-body" style="display:none; background:#f5f5f5; border-bottom:1px solid #ddd; padding:12px;">
+                <div id="settings-panel" class="box-body" style="display:none; padding:12px;">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
@@ -135,7 +144,7 @@ $(document).ready(function() {
                         </div>
                     </div>
                 </div>
-                <div class="box-body" style="height:380px; overflow-y:auto; background:#fcfcfc; padding:12px; border-bottom:1px solid #ddd;" id="chat-messages">
+                <div class="box-body" style="height:380px; overflow-y:auto; padding:12px;" id="chat-messages">
                     <div class="chat-sys">
                         <div class="chat-text">Welcome to OPNsense AI. I can help with firewall rules, ad blocking, Unbound DNS over TLS, and general OPNsense configuration. Ask me anything!</div>
                     </div>

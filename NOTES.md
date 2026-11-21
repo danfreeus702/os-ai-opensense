@@ -408,3 +408,19 @@ child of `.box` (not `.box-header`), computed text colour `rgb(51,51,51)` on
 `rgb(252,252,252)` background, and a screenshot confirms the welcome message is
 clearly legible. Smoke-tested all 3 plugin pages — titles/content load, zero
 console errors.
+
+## 2026-11-21 — AI Assistant panel restyled to menu colour scheme
+
+Follow-up to the unreadable-text fix: the chat panel used a light `#fcfcfc`
+surface while the rest of OPNsense uses its dark theme. Sampled the live theme
+and matched it in `index.volt`:
+
+- surface `#101218` (same as `body` and `#mainmenu`) for chat and settings panels
+- text `#ececec`, muted `#b9b9b9`, user `#ffb38a`, errors `#ff8a80`
+- borders `#2f3446`; input placeholder `#8a8f9c`
+- removed the old light inline backgrounds/borders
+
+Rebuilt and reinstalled on VM 304. Verified computed chat background and
+menu background are both `rgb(16,18,24)`, screenshot shows the panel visually
+consistent with the sidebar, and all 3 plugin pages load with zero console
+errors.
