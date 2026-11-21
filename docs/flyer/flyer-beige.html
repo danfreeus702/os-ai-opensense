@@ -9,10 +9,11 @@
     margin: 0; width: 1200px;
     background: #f4ecd8;
     color: #16243f;
-    font-family: "Trebuchet MS", "Segoe UI", system-ui, Arial, sans-serif;
+    font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
   }
-  .page { padding: 34px 44px 44px; }
+  .page { padding: 30px 44px 34px; }
   .topbar { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
   .logo { background:#1d3a7a; color:#fff; border-radius:12px; padding:10px 14px; font-weight:800; font-size:20px; letter-spacing:-.5px; }
   .logo em { color:#ffd84d; font-style:normal; }
@@ -32,7 +33,7 @@
   }
   .banner span { color:#d8473d; }
 
-  .intro { display:flex; gap:22px; margin-top:26px; }
+  .intro { display:flex; gap:14px; margin-top:18px; }
   .persona {
     width: 280px; flex:none;
     background:#fffaf0; border:3px solid #1b2f55; border-radius:20px;
@@ -47,37 +48,37 @@
     border:8px solid transparent; border-top-color:#1b2f55; }
   .diagram { flex:1; background:#fffaf0; border:3px solid #1b2f55; border-radius:20px; padding:14px; box-shadow:0 5px 0 #d8c9a8; }
 
-  .row { display:flex; gap:18px; margin-top:22px; }
-  .card { flex:1; background:#fffaf0; border:3px solid #1b2f55; border-radius:18px; padding:16px 18px; box-shadow:0 5px 0 #d8c9a8; }
-  .card h3 { margin:0 0 8px; font-size:22px; }
+  .row { display:flex; gap:14px; margin-top:16px; }
+  .card { flex:1; background:#fffaf0; border:3px solid #1b2f55; border-radius:18px; padding:14px 16px; box-shadow:0 5px 0 #d8c9a8; }
+  .card h3 { margin:0 0 6px; font-size:22px; font-weight:800; }
   .pill { display:inline-block; border-radius:999px; padding:5px 12px; font-weight:800; font-size:14px; color:#fff; margin-bottom:8px; }
   .p1{background:#2fa88f;} .p2{background:#3d6fd0;} .p3{background:#e08a2e;}
-  .card ul { margin:0; padding-left:18px; font-size:16px; line-height:1.5; }
+  .card ul { margin:0; padding-left:18px; font-size:16px; line-height:1.5; font-weight:600; }
   .card li { margin-bottom:3px; }
 
-  .lower { display:flex; gap:18px; margin-top:22px; }
-  .terminal { flex:1.1; background:#142238; border:3px solid #1b2f55; border-radius:18px; padding:16px 18px; color:#bfe9c8; font-family:"Courier New",monospace; font-size:16px; line-height:1.7; box-shadow:0 5px 0 #d8c9a8; }
+  .lower { display:flex; gap:14px; margin-top:16px; }
+  .terminal { flex:1.1; background:#142238; border:3px solid #1b2f55; border-radius:18px; padding:14px 16px; color:#bfe9c8; font-family:"Courier New",monospace; font-size:16px; font-weight:600; line-height:1.6; box-shadow:0 5px 0 #d8c9a8; }
   .terminal .prompt { color:#ffd84d; }
-  .scenario { flex:1; background:#fffaf0; border:3px solid #1b2f55; border-radius:18px; padding:16px 18px; box-shadow:0 5px 0 #d8c9a8; }
-  .scenario h3 { margin:0 0 10px; font-size:22px; }
-  .scenario div { font-size:16px; margin:6px 0; }
+  .scenario { flex:1; background:#fffaf0; border:3px solid #1b2f55; border-radius:18px; padding:14px 16px; box-shadow:0 5px 0 #d8c9a8; }
+  .scenario h3 { margin:0 0 8px; font-size:22px; font-weight:800; }
+  .scenario div { font-size:16px; font-weight:600; margin:5px 0; }
   .yes { color:#1f8a5b; font-weight:800; }
   .no { color:#d8473d; font-weight:800; }
 
   .question {
-    margin-top:22px; background:linear-gradient(#fff0a8,#ffd23f);
+    margin-top:16px; background:linear-gradient(#fff0a8,#ffd23f);
     border:4px solid #1b2f55; border-radius:999px; padding:18px 30px;
     text-align:center; font-size:34px; font-weight:900; box-shadow:0 6px 0 #c9a227;
   }
   .question small { display:block; font-size:18px; font-weight:700; color:#3d4d63; margin-top:6px; }
-  .foot { text-align:center; margin-top:18px; font-size:16px; font-weight:800; color:#3d4d63; }
+  .foot { text-align:center; margin-top:12px; font-size:16px; font-weight:800; color:#3d4d63; }
   .foot span { color:#1d3a7a; }
 </style>
 </head>
 <body>
 <div class="page">
   <div class="topbar">
-    <div class="logo">Ni<em>! </em>Networking with Daniel</div>
+    <div class="logo">AI<em>! </em>Networking with Daniel</div>
     <div class="tag">AI <b>SECURITY</b> CHALLENGE &nbsp;•&nbsp; OPNsense 26.7</div>
   </div>
 
@@ -112,8 +113,8 @@
         </defs>
         <!-- router -->
         <rect x="300" y="8" width="220" height="60" rx="12" fill="#3d6fd0" stroke="#16243f" stroke-width="4"/>
-        <text x="410" y="32" font-size="20" font-family="Trebuchet MS" font-weight="bold" fill="#fff" text-anchor="middle">OPNsense 26.7</text>
-        <text x="410" y="55" font-size="14" font-family="Trebuchet MS" fill="#dce9ff" text-anchor="middle">firewall • DNS • protection</text>
+        <text x="410" y="32" font-size="20" font-family="Segoe UI" font-weight="bold" fill="#fff" text-anchor="middle">OPNsense 26.7</text>
+        <text x="410" y="55" font-size="14" font-family="Segoe UI" fill="#dce9ff" text-anchor="middle">firewall • DNS • protection</text>
         <!-- switch -->
         <rect x="310" y="104" width="200" height="52" rx="10" fill="#1b2f55" stroke="#16243f" stroke-width="4"/>
         <g fill="#7fd1c1">
@@ -128,9 +129,9 @@
           <rect x="60" y="194" width="130" height="58" rx="8" fill="#d9f2e8"/><rect x="345" y="194" width="130" height="58" rx="8" fill="#dfe9fb"/><rect x="630" y="194" width="130" height="58" rx="8" fill="#ffe1c2"/>
           <rect x="95" y="252" width="60" height="6" rx="2" fill="#16243f"/><rect x="380" y="252" width="60" height="6" rx="2" fill="#16243f"/><rect x="665" y="252" width="60" height="6" rx="2" fill="#16243f"/>
         </g>
-        <text x="125" y="218" font-size="16" font-family="Trebuchet MS" font-weight="bold" text-anchor="middle">PC 1 • L1</text>
-        <text x="410" y="218" font-size="16" font-family="Trebuchet MS" font-weight="bold" text-anchor="middle">PC 2 • L2</text>
-        <text x="695" y="218" font-size="16" font-family="Trebuchet MS" font-weight="bold" text-anchor="middle">PC 3 • L3</text>
+        <text x="125" y="218" font-size="16" font-family="Segoe UI" font-weight="bold" text-anchor="middle">PC 1 • L1</text>
+        <text x="410" y="218" font-size="16" font-family="Segoe UI" font-weight="bold" text-anchor="middle">PC 2 • L2</text>
+        <text x="695" y="218" font-size="16" font-family="Segoe UI" font-weight="bold" text-anchor="middle">PC 3 • L3</text>
         <path d="M370 156 Q180 160 125 190" fill="none" stroke="#2fa88f" stroke-width="5" marker-end="url(#arr)"/>
         <path d="M410 156 L410 190" fill="none" stroke="#3d6fd0" stroke-width="5" marker-end="url(#arr)"/>
         <path d="M450 156 Q640 160 695 190" fill="none" stroke="#e08a2e" stroke-width="5" marker-end="url(#arr)"/>

@@ -537,3 +537,10 @@ engineer and a simple router → switch → three-PC diagram with colour-coded
 lines. Text stays short and highly legible (same clarity as the reference).
 Rendered at 1200×1240; source `docs/flyer/flyer-beige.html`, PNG
 `images/opnsense-ai-flyer-beige.png` and `~/Pictures/`.
+
+#### Beige flyer refinements (approved)
+
+- Fixed logo text: "Ni!" → "AI! Networking with Daniel".
+- Slightly heavier type: Segoe UI with weight 500 body / 600 lists / 800 headings.
+- Tighter layout: panel gaps 22→14px, row margins 22→16px, card padding trimmed.
+- Final PNG 1200×1210 at `images/opnsense-ai-flyer-beige.png` and `~/Pictures/`.
