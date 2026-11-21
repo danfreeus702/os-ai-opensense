@@ -1,11 +1,7 @@
 <menu>
-  <menuitem order="997">
-    <AIOpenSense VisibleName="OPNsense AI - Security Wizard" url="/ui/aiopensense/security/" />
-  </menuitem>
-  <menuitem order="998">
-    <AIOpenSense VisibleName="OPNsense AI" url="/ui/aiopensense/" />
-  </menuitem>
-  <menuitem order="999">
-    <AIOpenSense VisibleName="Configuration Guides" url="/ui/aiopensense/guides/" />
-  </menuitem>
+    <AIOpenSense order="997" cssClass="fa fa-shield" VisibleName="OPNsense AI">
+        <SecurityWizard order="10" VisibleName="Security Wizard" url="/ui/aiopensense/security/"/>
+        <Chat order="20" VisibleName="AI Assistant" url="/ui/aiopensense/"/>
+        <Guides order="30" VisibleName="Configuration Guides" url="/ui/aiopensense/guides/"/>
+    </AIOpenSense>
 </menu>
