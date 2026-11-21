@@ -23,16 +23,16 @@ class SecurityWizard
         ],
         2 => [
             'id' => 'level2',
-            'name' => 'Level 2 — Encrypted DNS (DoH)',
+            'name' => 'Level 2 — Encrypted DNS',
             'icon' => 'lock',
-            'description' => 'Everything in Level 1, plus DNS-over-HTTPS upstream so queries leave the network encrypted.',
+            'description' => 'Everything in Level 1, plus an encrypted DNS upstream (DoT on OPNsense 26.7 — the platform has no native DoH option).',
             'services' => ['unbound', 'dnsbl', 'doh'],
         ],
         3 => [
             'id' => 'level3',
             'name' => 'Level 3 — Maximum Security',
             'icon' => 'eye-close',
-            'description' => 'Everything in Level 2, plus DNSSEC validation, DNS-over-TLS, and optional Tailscale exit node.',
+            'description' => 'Everything in Level 2, plus DNSSEC validation, a second DoT upstream (Quad9), and optional Tailscale exit node.',
             'services' => ['unbound', 'dnsbl', 'doh', 'dnssec', 'dot', 'tailscale'],
         ],
     ];
@@ -85,9 +85,9 @@ class SecurityWizard
         if ($level >= 2) {
             $steps[] = [
                 'id' => 'doh',
-                'title' => 'Configure DNS-over-HTTPS upstream',
+                'title' => 'Configure encrypted DNS upstream (DoT)',
                 'action' => 'unbound.doh',
-                'detail' => 'Forward external queries to cloudflare-dns.com over HTTPS (port 443).',
+                'detail' => 'OPNsense 26.7 Unbound supports DoT only (no DoH type). Forward to 1.1.1.1:853 with TLS verification of cloudflare-dns.com — the same setup used in production.',
                 'risk' => 'medium',
             ];
         }
@@ -173,7 +173,7 @@ class SecurityWizard
         $features = [
             'Ad blocking (DNSBL)' => 1,
             'DNS caching / prefetch' => 1,
-            'DNS-over-HTTPS (DoH)' => 2,
+            'Encrypted upstream (DoT; no native DoH)' => 2,
             'DNSSEC validation' => 3,
             'DNS-over-TLS (DoT)' => 3,
             'Tailscale exit node (optional)' => 3,

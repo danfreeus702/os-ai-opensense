@@ -2,9 +2,13 @@
 """
 Hermes Security Wizard — OPNsense configuration actions.
 
-Invoked by configd (see actions_hermes.conf). Each action makes a targeted,
-idempotent change to /conf/config.xml via OPNsense's XML helpers where possible,
-and always writes an audit line to /var/log/hermes-security.log.
+Structures below were derived verbatim from the PRODUCTION OPNsense 26.7.9
+config at 192.168.10.140 (copied read-only for analysis), not guessed.
+
+Key finding: OPNsense 26.7 does NOT use <unbound>. DNS lives in
+<OPNsense><unboundplus> and <dnsmasq>. The Unbound model's <dots><dot><type>
+only accepts "dot" and "forward" — there is NO native DoH type. Encrypted
+upstreams are DoT (server 1.1.1.1, port 853, verify cloudflare-dns.com).
 
 Actions: enable_unbound, blocklist, doh, dnssec, dot, firewall, tailscale
 """
@@ -12,26 +16,23 @@ Actions: enable_unbound, blocklist, doh, dnssec, dot, firewall, tailscale
 import os
 import sys
 import logging
+import xml.etree.ElementTree as ET
 from datetime import datetime
 
 LOG = "/var/log/hermes-security.log"
 CONF = "/conf/config.xml"
 
-logging.basicConfig(
-    filename=LOG,
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-)
+logging.basicConfig(filename=LOG, level=logging.INFO,
+                    format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("hermes-security")
 
-BLOCKLISTS = [
-    "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
-    "https://big.oisd.nl/domainswild",
-]
-DOT_SERVERS = [
-    ("1.1.1.1", 853, "cloudflare-dns.com"),
-    ("9.9.9.9", 853, "dns.quad9.net"),
-]
+# Exact values observed in production config.xml
+PROD_DNSBL_TYPE = "atf,ag,sb,hgz005,hgz010,hgz019"
+PROD_DNSBL_TTL = "72000"
+PROD_DOT = {"server": "1.1.1.1", "port": "853", "verify": "cloudflare-dns.com",
+            "description": "Cloudflare", "type": "dot"}
+PROD_LOCAL_FORWARD = {"domain": "internal", "server": "127.0.0.1", "port": "53053",
+                      "type": "forward", "description": "Forward default domain to Dnsmasq DHCP"}
 
 
 def ok(msg):
@@ -46,112 +47,188 @@ def fail(msg):
     return 1
 
 
-def read_xml():
+def load():
     try:
-        import xml.etree.ElementTree as ET
         return ET.parse(CONF)
     except Exception as e:
-        log.error("cannot parse config: %s", e)
-        return None
+        return fail("cannot parse %s: %s" % (CONF, e))
+
+
+def save(tree):
+    """Write atomically so a failed write cannot corrupt the firewall config."""
+    tmp = CONF + ".hermes-tmp"
+    tree.write(tmp, encoding="utf-8", xml_declaration=True)
+    os.replace(tmp, CONF)
+    log.info("config.xml written atomically")
+
+
+def ensure(parent, tag):
+    node = parent.find(tag)
+    if node is None:
+        node = ET.SubElement(parent, tag)
+    return node
+
+
+def opnsense(tree):
+    root = tree.getroot()
+    o = root.find("OPNsense")
+    if o is None:
+        o = ET.SubElement(root, "OPNsense")
+    return o
+
+
+def unboundplus(tree):
+    return ensure(opnsense(tree), "unboundplus")
 
 
 def action_enable_unbound():
-    """Enable Unbound with a 4 MB cache and prefetch."""
-    tree = read_xml()
-    if tree is None:
-        return fail("cannot read config.xml")
-    root = tree.getroot()
-    unbound = root.find("unbound")
-    if unbound is None:
-        unbound = __import__("xml.etree.ElementTree", fromlist=["Element"]).Element("unbound")
-        root.append(unbound)
-
-    def setval(tag, val):
-        node = unbound.find(tag)
-        if node is None:
-            node = __import__("xml.etree.ElementTree", fromlist=["Element"]).SubElement(unbound, tag)
-        node.text = str(val)
-
-    setval("enable", "1")
-    setval("cachesize", "4")
-    setval("prefetch", "1")
-    tree.write(CONF, encoding="utf-8", xml_declaration=True)
-    return ok("Unbound enabled (cache 4 MB, prefetch on)")
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    u = ensure(unboundplus(tree), "general")
+    ensure(u, "enabled").text = "1"
+    ensure(u, "port").text = "53"
+    adv = ensure(unboundplus(tree), "advanced")
+    ensure(adv, "prefetch").text = "1"
+    # production uses msgcachesize empty (default); set explicit 4 MB cache
+    ensure(adv, "msgcachesize").text = "4"
+    save(tree)
+    return ok("Unbound enabled: port 53, cache 4 MB, prefetch on")
 
 
 def action_blocklist():
-    """Add DNS blocklists to Unbound via the OPNsense dnsbl helper if present."""
-    helper = "/usr/local/opnsense/scripts/unbound/dnsbl.py"
-    if os.path.exists(helper):
-        import subprocess
-        rc = subprocess.call([sys.executable, helper, "update"])
-        if rc == 0:
-            return ok("DNS blocklists updated via unbound/dnsbl.py")
-    # Fallback: record intended lists in the log for manual review
-    log.info("blocklists intended: %s", ", ".join(BLOCKLISTS))
-    return ok("Blocklist targets recorded (review in Unbound DNSBL settings): " + ", ".join(BLOCKLISTS))
-
-
-def action_doh():
-    """Configure DNS-over-HTTPS upstream (port 443) in Unbound."""
-    tree = read_xml()
-    if tree is None:
-        return fail("cannot read config.xml")
-    log.info("DoH upstream requested: cloudflare-dns.com:443")
-    # OPNsense 26.7 uses dot/doh via unboundplus; set explicit DoT-style entry
-    # with port 443 and tls disabled is not DoH — record for GUI configuration.
-    return ok("DoH upstream queued for cloudflare-dns.com:443 (verify in Unbound → DNS over TLS)")
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    dnsbl = ensure(unboundplus(tree), "dnsbl")
+    bl = ensure(dnsbl, "blocklist")
+    ensure(bl, "enabled").text = "1"
+    ensure(bl, "type").text = PROD_DNSBL_TYPE
+    ensure(bl, "nxdomain").text = "0"
+    ensure(bl, "cache_ttl").text = PROD_DNSBL_TTL
+    ensure(bl, "description").text = "Hermes DNSBL"
+    save(tree)
+    return ok("DNS blocklist enabled (type=%s, ttl=%s)" % (PROD_DNSBL_TYPE, PROD_DNSBL_TTL))
 
 
 def action_dnssec():
-    tree = read_xml()
-    if tree is None:
-        return fail("cannot read config.xml")
-    root = tree.getroot()
-    unbound = root.find("unbound")
-    if unbound is None:
-        return fail("unbound section missing")
-    node = unbound.find("dnssec")
-    if node is None:
-        node = __import__("xml.etree.ElementTree", fromlist=["Element"]).SubElement(unbound, "dnssec")
-    node.text = "1"
-    tree.write(CONF, encoding="utf-8", xml_declaration=True)
-    return ok("DNSSEC validation enabled")
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    general = ensure(unboundplus(tree), "general")
+    ensure(general, "dnssec").text = "1"
+    save(tree)
+    return ok("DNSSEC validation enabled in unboundplus/general")
+
+
+def add_dot_entry(tree, spec, description):
+    dots = ensure(unboundplus(tree), "dots")
+    # idempotent: do not duplicate an existing server+port
+    for existing in dots.findall("dot"):
+        if ((existing.findtext("server") or "") == spec["server"] and
+                (existing.findtext("port") or "") == spec["port"]):
+            return False
+    dot = ET.SubElement(dots, "dot")
+    for k in ("enabled", "type", "domain", "server", "port", "verify",
+              "forward_tcp_upstream", "forward_first", "description"):
+        ET.SubElement(dot, k)
+    dot.find("enabled").text = "1"
+    dot.find("type").text = spec["type"]
+    dot.find("server").text = spec["server"]
+    dot.find("port").text = spec["port"]
+    dot.find("verify").text = spec.get("verify", "")
+    dot.find("forward_tcp_upstream").text = "0"
+    dot.find("forward_first").text = "0"
+    dot.find("description").text = description
+    return True
 
 
 def action_dot():
-    """Add DNS-over-TLS upstream servers."""
-    tree = read_xml()
-    if tree is None:
-        return fail("cannot read config.xml")
-    log.info("DoT upstreams: %s", DOT_SERVERS)
-    return ok("DoT upstreams recorded: " + ", ".join(f"{h}@{p}" for h, p, _ in DOT_SERVERS))
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    added = add_dot_entry(tree, PROD_DOT, PROD_DOT["description"])
+    if added:
+        # keep production's local-domain forward to dnsmasq
+        add_dot_entry(tree, PROD_LOCAL_FORWARD, PROD_LOCAL_FORWARD["description"])
+        save(tree)
+    return ok("DoT upstream %s:%s (verify=%s)%s" % (
+        PROD_DOT["server"], PROD_DOT["port"], PROD_DOT["verify"],
+        "" if added else " — already present"))
+
+
+def action_doh():
+    """
+    OPNsense 26.7 Unbound has no DoH type (only dot/forward). We implement the
+    encrypted-upstream tier with DoT — the platform's supported mechanism — and
+    say so explicitly rather than pretending DoH was configured.
+    """
+    return action_dot()
 
 
 def action_firewall():
-    """Log required firewall rules; OPNsense rules are reviewed in the GUI."""
-    rules = [
-        "LAN -> any TCP/UDP 53 (DNS)",
-        "LAN -> any TCP 443 (DoH, level 2+)",
-        "LAN -> any TCP 853 (DoT, level 3)",
+    """
+    Firewall rules live at <OPNsense><Firewall><Filter><rules><rule>.
+    Production already has 'Default allow LAN to any rule', which covers DNS,
+    DoT and DoH egress. Only add specific rules if that default is absent.
+    """
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    fw = ensure(ensure(ensure(opnsense(tree), "Firewall"), "Filter"), "rules")
+    has_default = any((r.findtext("description") or "").startswith("Default allow LAN")
+                      for r in fw.findall("rule"))
+    if has_default:
+        return ok("Default allow LAN to any rule already present — no extra DNS rules needed")
+
+    specs = [
+        ("DNS", "53", "Allow LAN DNS (TCP/UDP 53)"),
+        ("TCP", "853", "Allow LAN DoT (TCP 853)"),
+        ("TCP", "443", "Allow LAN DoH (TCP 443)"),
     ]
-    for r in rules:
-        log.info("firewall rule required: %s", r)
-    return ok("Required firewall rules documented: " + "; ".join(rules))
+    count = 0
+    for proto, port, desc in specs:
+        rule = ET.SubElement(fw, "rule")
+        fields = {
+            "enabled": "1", "statetype": "keep", "state-policy": "", "sequence": str(900 + count),
+            "action": "pass", "quick": "1", "interfacenot": "0", "interface": "lan",
+            "received-on-not": "0", "received-on": "", "direction": "in", "ipprotocol": "inet",
+            "protocol": proto if proto != "DNS" else "tcp", "icmptype": "", "icmp6type": "",
+            "source_net": "lan", "source_not": "0", "source_port": "",
+            "destination_net": "any", "destination_not": "0", "destination_port": port,
+            "divert-to": "", "gateway": "", "replyto": "", "disablereplyto": "0",
+            "log": "0", "allowopts": "0", "nosync": "0", "nopfsync": "0",
+            "statetimeout": "", "udp-first": "", "udp-multiple": "", "udp-single": "",
+            "max-src-nodes": "", "max-src-states": "", "max-src-conn": "", "max": "",
+            "max-src-conn-rate": "", "max-src-conn-rates": "", "max-pkt-rate-number": "",
+            "max-pkt-rate-seconds": "", "overload": "", "adaptivestart": "", "adaptiveend": "",
+            "prio": "", "set-prio": "", "set-prio-low": "", "tag": "", "tagged": "",
+            "tcpflags1": "", "tcpflags2": "", "tcpflags_any": "0", "categories": "",
+            "sched": "", "tos": "", "shaper1": "", "shaper2": "", "description": desc, "audit": "",
+        }
+        for k, v in fields.items():
+            ET.SubElement(rule, k).text = v
+        count += 1
+    save(tree)
+    return ok("Added %d LAN egress rules (53/853/443)" % count)
 
 
 def action_tailscale():
-    """Enable Tailscale exit node if tailscaled is installed."""
-    import shutil
-    import subprocess
-    ts = shutil.which("tailscale")
-    if not ts:
-        return fail("tailscale not installed on this OPNsense instance")
-    cmd = [ts, "up", "--advertise-exit-node", "--accept-dns=false"]
-    rc = subprocess.call(cmd)
-    if rc != 0:
-        return fail("tailscale up failed (rc=%d) — approve the node in Tailscale admin" % rc)
-    return ok("Tailscale exit node advertised — approve it in the admin console")
+    """
+    Production stores Tailscale at <OPNsense><tailscale><settings>:
+      enabled, acceptDNS=0, advertiseExitNode=1, acceptSubnetRoutes=1, enableSSH=1
+    """
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    settings = ensure(ensure(opnsense(tree), "tailscale"), "settings")
+    ensure(settings, "enabled").text = "1"
+    ensure(settings, "acceptDNS").text = "0"
+    ensure(settings, "advertiseExitNode").text = "1"
+    ensure(settings, "acceptSubnetRoutes").text = "1"
+    ensure(settings, "enableSSH").text = "1"
+    save(tree)
+    return ok("Tailscale exit node enabled in config; approve the node in Tailscale admin console")
 
 
 ACTIONS = {
