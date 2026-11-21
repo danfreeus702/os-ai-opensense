@@ -4,8 +4,8 @@ namespace OPNsense\Hermes;
 /**
  * Security Wizard — 3-tier hardened configuration for OPNsense.
  *
- * Level 1: Ad blocking + DNS caching (Unbound forwarder with local cache)
- * Level 2: Level 1 + DNS-over-HTTPS (DoH) upstream
+ * Level 1: Ad blocking + DNS caching + ClamAV antivirus
+ * Level 2: Level 1 + encrypted DNS (DoT) + CrowdSec intrusion prevention
  * Level 3: Level 2 + DNSSEC + DNS-over-TLS + optional Tailscale exit node
  *
  * Each level produces a reviewable plan plus a set of configd actions that
@@ -16,24 +16,24 @@ class SecurityWizard
     public const LEVELS = [
         1 => [
             'id' => 'level1',
-            'name' => 'Level 1 — Ad Blocking & DNS Cache',
+            'name' => 'Level 1 — Ad Blocking, DNS Cache & Antivirus',
             'icon' => 'shield',
-            'description' => 'Network-wide ad blocking via Unbound blocklists, with DNS caching for faster lookups.',
-            'services' => ['unbound', 'dnsbl'],
+            'description' => 'Network-wide ad blocking via Unbound blocklists, DNS caching, and ClamAV antivirus scanning.',
+            'services' => ['unbound', 'dnsbl', 'clamav'],
         ],
         2 => [
             'id' => 'level2',
-            'name' => 'Level 2 — Encrypted DNS',
+            'name' => 'Level 2 — Encrypted DNS & Intrusion Prevention',
             'icon' => 'lock',
-            'description' => 'Everything in Level 1, plus an encrypted DNS upstream (DoT on OPNsense 26.7 — the platform has no native DoH option).',
-            'services' => ['unbound', 'dnsbl', 'doh'],
+            'description' => 'Everything in Level 1, plus encrypted DNS (DoT) and CrowdSec collaborative intrusion prevention.',
+            'services' => ['unbound', 'dnsbl', 'clamav', 'doh', 'crowdsec'],
         ],
         3 => [
             'id' => 'level3',
             'name' => 'Level 3 — Maximum Security',
             'icon' => 'eye-close',
             'description' => 'Everything in Level 2, plus DNSSEC validation, a second DoT upstream (Quad9), and optional Tailscale exit node.',
-            'services' => ['unbound', 'dnsbl', 'doh', 'dnssec', 'dot', 'tailscale'],
+            'services' => ['unbound', 'dnsbl', 'clamav', 'doh', 'crowdsec', 'dnssec', 'dot', 'tailscale'],
         ],
     ];
 
@@ -81,6 +81,13 @@ class SecurityWizard
             'detail' => 'Add ' . count($options['blocklists'] ?? self::BLOCKLISTS) . ' blocklists to Unbound.',
             'risk' => 'low',
         ];
+        $steps[] = [
+            'id' => 'clamav',
+            'title' => 'Enable ClamAV antivirus',
+            'action' => 'clamav',
+            'detail' => 'Enable ClamAV with freshclam updates, TCP scanning, archive/PE/ELF/PDF scanning, 100 MB max scan size and 25 MB max file size — matching the production profile.',
+            'risk' => 'medium',
+        ];
 
         if ($level >= 2) {
             $steps[] = [
@@ -88,6 +95,16 @@ class SecurityWizard
                 'title' => 'Configure encrypted DNS upstream (DoT)',
                 'action' => 'doh',
                 'detail' => 'OPNsense 26.7 Unbound supports DoT only (no DoH type). Forward to 1.1.1.1:853 with TLS verification of cloudflare-dns.com — the same setup used in production.',
+                'risk' => 'medium',
+            ];
+        }
+
+        if ($level >= 2) {
+            $steps[] = [
+                'id' => 'crowdsec',
+                'title' => 'Enable CrowdSec intrusion prevention',
+                'action' => 'crowdsec',
+                'detail' => 'Enable the CrowdSec agent, local API (127.0.0.1:8080), firewall bouncer and rule updates — matching the production profile.',
                 'risk' => 'medium',
             ];
         }
@@ -173,6 +190,8 @@ class SecurityWizard
         $features = [
             'Ad blocking (DNSBL)' => 1,
             'DNS caching / prefetch' => 1,
+            'ClamAV antivirus scanning' => 1,
+            'CrowdSec intrusion prevention' => 2,
             'Encrypted upstream (DoT; no native DoH)' => 2,
             'DNSSEC validation' => 3,
             'DNS-over-TLS (DoT)' => 3,

@@ -34,6 +34,29 @@ PROD_DOT = {"server": "1.1.1.1", "port": "853", "verify": "cloudflare-dns.com",
 PROD_LOCAL_FORWARD = {"domain": "internal", "server": "127.0.0.1", "port": "53053",
                       "type": "forward", "description": "Forward default domain to Dnsmasq DHCP"}
 
+# Exact ClamAV values from production config.xml (OPNsense 26.7.9)
+PROD_CLAMAV = {
+    "enabled": "1", "fc_enabled": "1", "enabletcp": "1", "maxthreads": "10",
+    "maxqueue": "100", "idletimeout": "30", "maxdirrecursion": "20",
+    "followdirsym": "0", "followfilesym": "0", "disablecache": "0",
+    "scanpe": "1", "scanelf": "1", "detectbroken": "0", "scanole2": "1",
+    "ole2blockmarcros": "0", "scanpdf": "1", "scanswf": "1",
+    "scanxmldocs": "1", "scanhwp3": "1", "scanmailfiles": "1",
+    "scanhtml": "1", "scanarchive": "1", "arcblockenc": "0",
+    "maxscansize": "100M", "maxfilesize": "25M", "maxrecursion": "16",
+    "maxfiles": "10000", "logverbose": "0", "fc_logverbose": "0",
+    "fc_databasemirror": "database.clamav.net", "fc_timeout": "60",
+    "fc_malwareexpert": "0", "fc_blurl": "0", "fc_jurlbla": "0", "fc_bofhland": "0",
+}
+
+# Exact CrowdSec values from production config.xml
+PROD_CROWDSEC = {
+    "agent_enabled": "1", "lapi_enabled": "1", "firewall_bouncer_enabled": "1",
+    "lapi_manual_configuration": "0", "lapi_listen_address": "127.0.0.1",
+    "lapi_listen_port": "8080", "rules_enabled": "1", "rules_log": "0",
+    "rules_tag": "", "enroll_key": "", "crowdsec_firewall_verbose": "0",
+}
+
 
 def ok(msg):
     log.info("OK: %s", msg)
@@ -224,6 +247,30 @@ def action_firewall():
     return ok("Added %d LAN egress rules (53/853/443)" % count)
 
 
+def action_clamav():
+    """Enable ClamAV with the exact production profile."""
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    general = ensure(ensure(opnsense(tree), "clamav"), "general")
+    for k, v in PROD_CLAMAV.items():
+        ensure(general, k).text = v
+    save(tree)
+    return ok("ClamAV enabled (freshclam, TCP scan, 100M/25M limits)")
+
+
+def action_crowdsec():
+    """Enable CrowdSec with the exact production profile."""
+    tree = load()
+    if isinstance(tree, int):
+        return tree
+    general = ensure(ensure(opnsense(tree), "crowdsec"), "general")
+    for k, v in PROD_CROWDSEC.items():
+        ensure(general, k).text = v
+    save(tree)
+    return ok("CrowdSec enabled (agent, LAPI 127.0.0.1:8080, firewall bouncer, rules)")
+
+
 def action_record_level():
     """Persist the applied level in config.xml for the wizard status API."""
     level = '0'
@@ -271,6 +318,8 @@ ACTIONS = {
     "firewall": action_firewall,
     "tailscale": action_tailscale,
     "record_level": action_record_level,
+    "clamav": action_clamav,
+    "crowdsec": action_crowdsec,
 }
 
 

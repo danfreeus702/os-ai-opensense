@@ -93,6 +93,7 @@ class SecurityWizardController extends ApiControllerBase
         $allowed = [
             'unbound-enable', 'blocklist', 'doh',
             'dnssec', 'dot', 'firewall', 'tailscale', 'record_level',
+            'clamav', 'crowdsec',
         ];
         if (!in_array($action, $allowed, true)) {
             return ['action' => $action, 'ok' => false, 'error' => 'Action not allowed'];
