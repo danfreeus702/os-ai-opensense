@@ -62,6 +62,13 @@ class SecurityWizardController extends ApiControllerBase
             return !$r['ok'];
         });
 
+        // Record for statusAction()
+        file_put_contents(
+            '/var/log/hermes-security.log',
+            date('Y-m-d H:i:s') . ' INFO applied level ' . $level . "\n",
+            FILE_APPEND
+        );
+
         return [
             'status' => count($failed) === 0 ? 'ok' : 'partial',
             'level' => $level,
@@ -72,13 +79,21 @@ class SecurityWizardController extends ApiControllerBase
         ];
     }
 
-    /** Last applied level (stored in config.xml under hermes/security). */
+    /** Last applied level — read from the audit log (no model dependency). */
     public function statusAction()
     {
-        $config = \OPNsense\Base\Config::load('OPNsense/Hermes');
-        $general = $config->get('general');
-        $applied = isset($general->security_level) ? (string)$general->security_level : '0';
-        return ['status' => 'ok', 'applied_level' => $applied];
+        $level = '0';
+        $log = '/var/log/hermes-security.log';
+        if (file_exists($log)) {
+            $lines = file($log, FILE_IGNORE_NEW_LINES);
+            foreach (array_reverse($lines ?: []) as $line) {
+                if (preg_match('/applied level (\d)/', $line, $m)) {
+                    $level = $m[1];
+                    break;
+                }
+            }
+        }
+        return ['status' => 'ok', 'applied_level' => $level];
     }
 
     /** Execute a configd action safely; never interpolate untrusted strings. */
