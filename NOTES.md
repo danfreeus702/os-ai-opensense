@@ -10,7 +10,7 @@ Native OPNsense plugin that embeds an AI assistant and a 3-tier security wizard
 in the firewall web GUI. Cloud LLM only (OpenRouter primary, NVIDIA NIM
 fallback via `LLMProvider.php`). No local/Ollama backend.
 
-Repo: https://github.com/danfreeus702/os-hermes-plugin
+Repo: https://github.com/danfreeus702/os-ai-opensense
 
 ---
 
@@ -18,7 +18,7 @@ Repo: https://github.com/danfreeus702/os-hermes-plugin
 
 - Replaced the hardwired Ollama `/api/chat` calls with an OpenAI-compatible
   `LLMProvider` service (OpenRouter + NVIDIA fallback, key from root-only
-  `/conf/hermes.key`).
+  `/conf/aiopensense.key`).
 - Fixed 3 pre-existing bugs: invalid XML in the settings form
   (`< equalities>`), `Guide.php` extending `BaseModel` without `Guide.xml`
   (broke migrations), deprecated `curl_close()` on PHP 8.5.
@@ -120,7 +120,7 @@ Required work:
 - **Third provider preset `local`** in `LLMProvider::PRESETS` with configurable
   `api_endpoint` (e.g. `http://<llm-host>:11434/v1`, llama.cpp, vLLM, LM Studio).
   Ollama's `/v1/chat/completions` is OpenAI-compatible — no code fork needed.
-  Optional API key stays in `/conf/hermes.key`; local mode can be key-less.
+  Optional API key stays in `/conf/aiopensense.key`; local mode can be key-less.
 - **Model capability gate** — a `local` preflight probe: does the model return
   valid JSON for rule parsing? Small models (1B–3B) hallucinated structured
   output in earlier testing; require a minimum context/tool-capable model or
@@ -153,12 +153,12 @@ one-click, not just a raw XML file.
 Required work:
 
 - **Pre-apply snapshot** — a configd `[backup]` action copying
-  `/conf/config.xml` to `/conf/hermes/backups/config-<ts>.xml` before any apply,
+  `/conf/config.xml` to `/conf/aiopensense/backups/config-<ts>.xml` before any apply,
   preserving `644 root:wheel`, with a checksum and metadata
   (level, timestamp, who applied). Keep last N (e.g. 10).
 - **Semantic diff** — a controller helper that compares two snapshots and
   reports *changed field paths* in the wizard's sections only
-  (`unboundplus`, `clamav`, `crowdsec`, `firewall`, `hermes`, `tailscale`):
+  (`unboundplus`, `clamav`, `crowdsec`, `firewall`, `aiopensense`, `tailscale`):
   e.g. `unboundplus/general/dnssec: 0 -> 1`, `+ rule: AI-TEST allow DNS`.
   Show this in the plan/review step, not a raw XML dump.
 - **Rollback action** — configd `[rollback]` restore: validate candidate XML
@@ -176,7 +176,7 @@ Required work:
   preview button, one-click rollback button, and the current `applied_level`
   highlighted.
 - **Audit** — log backup / apply / rollback with identity to
-  `/var/log/hermes-security.log`; exportable report for compliance.
+  `/var/log/aiopensense-security.log`; exportable report for compliance.
 - **Testing** — apply L1 -> snapshot -> apply L2 -> diff shows only DoT/CrowdSec
   changes -> rollback to L1 snapshot -> verify values reverted and services
   healthy; plus bad-snapshot rejection and partial-apply auto-rollback tests.

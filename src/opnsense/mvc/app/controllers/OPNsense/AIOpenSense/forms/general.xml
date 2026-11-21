@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+  <field name="frmGeneral">
+    <field name="enabled" type="FieldVisibility">
+      <visibility>
+        <condition type="FieldBool" ensureIfTrue="1">
+          <if field="enabled">
+            <equalities>
+              <eq>1</eq>
+            </equalities>
+          </if>
+        </condition>
+      </visibility>
+    </field>
+    <field name="provider" type="Option">
+      <label>Cloud LLM Provider</label>
+      <description>OpenRouter is recommended. NVIDIA NIM is used automatically as fallback.</description>
+      <default>openrouter</default>
+      <required>Y</required>
+    </field>
+    <field name="api_endpoint" type="Input">
+      <label>API Endpoint (optional)</label>
+      <description>Leave blank to use the provider preset endpoint.</description>
+      <required>N</required>
+    </field>
+    <field name="model" type="Input">
+      <label>Model (optional)</label>
+      <description>Leave blank to use the provider preset model.</description>
+      <required>N</required>
+    </field>
+    <field name="api_key_file" type="Input">
+      <label>API Key File</label>
+      <description>Root-only file containing the provider API key. Never paste keys into the GUI or config.xml.</description>
+      <default>/conf/aiopensense.key</default>
+      <required>Y</required>
+    </field>
+    <field name="send_context" type="BooleanField">
+      <label>Send firewall context</label>
+      <description>Include a small, non-sensitive snapshot (rule counts, interface names, gateway IPs) with requests. Disable to keep all firewall metadata local.</description>
+      <default>1</default>
+      <required>N</required>
+    </field>
+    <field name="system_prompt" type="Textarea">
+      <label>System Prompt</label>
+      <description>Instructions for the AI assistant behavior and knowledge</description>
+      <rows>4</rows>
+      <required>N</required>
+    </field>
+  </field>
+</form>

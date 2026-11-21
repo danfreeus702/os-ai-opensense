@@ -1,7 +1,9 @@
 # Secrets — never commit
-/conf/hermes.key
+/conf/aiopensense.key
 *.key
 work/
 *.pkg
 *.txz
 analysis/
+__pycache__/
+*.pyc

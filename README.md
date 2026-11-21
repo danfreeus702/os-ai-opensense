@@ -8,7 +8,7 @@ DNS settings — ready to review and apply.
 **Cloud LLM only** (OpenRouter primary, NVIDIA NIM fallback). No local/Ollama
 backend, so it works on appliances with limited resources.
 
-🔗 **Live repo:** https://github.com/danfreeus702/os-hermes-plugin
+🔗 **Live repo:** https://github.com/danfreeus702/os-ai-opensense-plugin
 
 ---
 
@@ -22,7 +22,7 @@ backend, so it works on appliances with limited resources.
 
 Every level produces a **reviewable plan** before anything is applied, includes
 the necessary firewall rules, and writes an audit log to
-`/var/log/hermes-security.log`.
+`/var/log/aiopensense-security.log`.
 
 > OPNsense 26.7 has no native DNS-over-HTTPS setting in Unbound (only `dot` and
 > `forward`), so the "encrypted DNS" tier uses DoT — the same mechanism used on
@@ -32,9 +32,9 @@ the necessary firewall rules, and writes an audit log to
 
 ```
 OPNsense GUI (Volt/jQuery)
-   ├── AI chat panel        → /api/hermes/chat/query
-   ├── Security Wizard      → /api/hermes/securityWizard/{levels,plan,apply,status}
-   └── Guides               → /api/hermes/guide/*
+   ├── AI chat panel        → /api/aiopensense/chat/query
+   ├── Security Wizard      → /api/aiopensense/securityWizard/{levels,plan,apply,status}
+   └── Guides               → /api/aiopensense/guide/*
                 ↓
 PHP controllers / models (Phalcon MVC)
                 ↓

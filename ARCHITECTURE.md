@@ -1,4 +1,4 @@
-# Hermes AI — OPNsense Native Plugin
+# OPNsense AI — OPNsense Native Plugin
 
 **Architecture & Design Document**
 
@@ -6,16 +6,16 @@
 
 ## 1. Overview
 
-Hermes is a native OPNsense plugin that embeds an AI chat assistant into the firewall's web GUI. Users describe what they want in plain language — "allow HTTPS to my web server from the internet" — and the AI returns correct OPNsense configuration: firewall rules, NAT entries, aliases, and routing changes — in the exact format the firewall expects, ready to review and apply.
+OPNsense AI is a native OPNsense plugin that embeds an AI chat assistant into the firewall's web GUI. Users describe what they want in plain language — "allow HTTPS to my web server from the internet" — and the AI returns correct OPNsense configuration: firewall rules, NAT entries, aliases, and routing changes — in the exact format the firewall expects, ready to review and apply.
 
 **Target:** OPNsense 24.7+
 
-**Plugin identifier:** `os-hermes`
+**Plugin identifier:** `os-ai-opensense`
 
 **LLM backend:** Cloud, OpenAI-compatible `/chat/completions`. Default provider
 is **OpenRouter** (`nvidia/nemotron-3.5-lightning:free`) with automatic fallback
 to **NVIDIA NIM** (`deepseek-ai/deepseek-v4.1-flash`). Local/Ollama is not used.
-API keys are read from a root-only file (`/conf/hermes.key`), never from
+API keys are read from a root-only file (`/conf/aiopensense.key`), never from
 `config.xml`.
 
 ---
@@ -26,21 +26,21 @@ API keys are read from a root-only file (`/conf/hermes.key`), never from
 ┌─────────────────────────────────────────────────┐
 │                 OPNsense GUI (Web)              │
 │  ┌─────────────────────────────────────────┐    │
-│  │         Hermes Chat Panel               │    │
+│  │         OPNsense AI Chat Panel               │    │
 │  │  ┌───────────────────────────────────┐  │    │
 │  │  │ User message (natural language)   │  │    │
 │  │  └───────────────────────────────────┘  │    │
-│  │         ↓  AJAX POST /api/hermes/chat  │    │
+│  │         ↓  AJAX POST /api/aiopensense/chat  │    │
 │  └─────────────────────────────────────────┘    │
 │                    ↑ JSON response              │
 ├─────────────────────────────────────────────────┤
-│         os-hermes Plugin (PHP/Phalcon MVC)      │
+│         os-ai-opensense Plugin (PHP/Phalcon MVC)      │
 │  ┌─────────────┬──────────────┬────────────┐    │
 │  │ Index       │ Api/Chat     │ Api/Guide  │    │
 │  │ Controller  │ Controller   │ Controller │    │
 │  ├─────────────┼──────────────┼────────────┤    │
 │  │ Model:      │ Config       │            │    │
-│  │ Hermes      │ (settings)   │            │    │
+│  │ AIOpenSense │ (settings)   │            │    │
 │  └─────────────┴──────────────┴────────────┘    │
 │                    ↓ cURL                        │
 ├─────────────────────────────────────────────────┤
@@ -60,14 +60,14 @@ API keys are read from a root-only file (`/conf/hermes.key`), never from
 |---|---|
 | **GUI (Volt + jQuery)** | Chat panel, settings form, message history, guide wizard UI |
 | **Controllers (PHP)** | Validate input, build prompt with OPNsense context, call Ollama via cURL, return structured response |
-| **Model (PHP)** | Mount point for config.xml settings (`//OPNsense/hermes`) |
+| **Model (PHP)** | Mount point for config.xml settings (`//OPNsense/aiopensense`) |
 | **Config (XML)** | `enabled`, `ollama_host`, `ollama_model`, `api_key`, `system_prompt`, `max_tokens`, `temperature`, `timeout` |
 | **LLM (Ollama)** | Receives prompt with OPNsense context; returns natural-language guidance *plus* structured configuration suggestions |
 | **Backend (optional)** | configd actions for enable/disable; Python stub for future config-apply via API |
 
 ### Data flow (chat request)
 
-1. User types message in chat panel → jQuery `POST /api/hermes/chat`
+1. User types message in chat panel → jQuery `POST /api/aiopensense/chat`
 2. `ChatController::sendAction()` receives `{message, context_level}`
 3. Controller loads current OPNsense config (`/conf/config.xml`), extracts relevant state
 4. Controller builds system prompt (from settings) + user message + context block
@@ -92,7 +92,7 @@ The prompt is the core of how the AI understands OPNsense. It has three parts:
 
 ### System prompt (configurable, default)
 
-> "You are Hermes, an AI assistant for OPNsense firewall administration. You help users configure their firewall through natural language. You understand OPNsense's configuration format: firewall rules in `/conf/config.xml`, NAT rules, aliases, interfaces, routing, Unbound DNS, and plugins. You always respond in clear, practical language. When users ask you to create or modify configuration, you provide the exact OPNsense-compatible entries (rule fields, NAT entries, alias definitions) formatted so the user can apply them directly through the GUI or CLI. You never apply changes yourself — you always show the user what to apply and let them decide."
+> "You are OPNsense AI, an AI assistant for OPNsense firewall administration. You help users configure their firewall through natural language. You understand OPNsense's configuration format: firewall rules in `/conf/config.xml`, NAT rules, aliases, interfaces, routing, Unbound DNS, and plugins. You always respond in clear, practical language. When users ask you to create or modify configuration, you provide the exact OPNsense-compatible entries (rule fields, NAT entries, alias definitions) formatted so the user can apply them directly through the GUI or CLI. You never apply changes yourself — you always show the user what to apply and let them decide."
 
 ### Context block (auto-generated, read-only)
 
@@ -204,19 +204,19 @@ For the initial version, the AI shows the rule in a clear format, and the user a
 
 ## 5. Configuration (settings.xml)
 
-The plugin stores its settings under `//OPNsense/hermes`:
+The plugin stores its settings under `//OPNsense/aiopensense`:
 
 ```xml
-<hermes>
+<aiopensense>
   <enabled>1</enabled>
   <ollama_host>http://127.0.0.1:11434</ollama_host>
   <ollama_model>llama3.1</ollama_model>
   <api_key></api_key>
-  <system_prompt>You are Hermes, an AI assistant for OPNsense...</system_prompt>
+  <system_prompt>You are OPNsense AI, an AI assistant for OPNsense...</system_prompt>
   <max_tokens>2048</max_tokens>
   <temperature>0.7</temperature>
   <timeout>30</timeout>
-</hermes>
+</aiopensense>
 ```
 
 All fields are editable through the Settings panel in the chat UI.
@@ -238,18 +238,18 @@ All fields are editable through the Settings panel in the chat UI.
 ### Build
 
 ```bash
-cd /path/to/os-hermes-plugin
+cd /path/to/os-ai-opensense-plugin
 make package
-# Produces: os-hermes-0.1.txz
+# Produces: os-ai-opensense-0.1.txz
 ```
 
 ### Install on OPNsense
 
 ```bash
 # Via SSH or SCP
-scp os-hermes-0.1.txz root@opnsense:/tmp/
+scp os-ai-opensense-0.1.txz root@opnsense:/tmp/
 ssh root@opnsense
-pkg add /tmp/os-hermes-0.1.txz
+pkg add /tmp/os-ai-opensense-0.1.txz
 # Or via GUI: System → Firmware → Plugins → install from local file
 ```
 
@@ -263,7 +263,7 @@ The firewall must be able to reach the Ollama API:
 ### First use
 
 1. Install plugin
-2. Open Hermes from the menu
+2. Open OPNsense AI from the menu
 3. Configure Ollama host + model in Settings
 4. Type a message: "Allow SSH from WAN to 192.168.1.10"
 5. Review the AI's suggested rule
@@ -274,32 +274,32 @@ The firewall must be able to reach the Ollama API:
 ## 8. File Manifest
 
 ```
-os-hermes-plugin/
+os-ai-opensense-plugin/
 ├── Makefile
 ├── pkg-descr
 └── src/
     └── opnsense/
         ├── mvc/
         │   └── app/
-        │       ├── controllers/OPNsense/Hermes/
+        │       ├── controllers/OPNsense/AIOpenSense/
         │       │   ├── IndexController.php
         │       │   ├── GuideController.php
         │       │   └── Api/
         │       │       ├── SettingsController.php
         │       │       ├── ChatController.php
         │       │       └── GuideApiController.php
-        │       ├── models/OPNsense/Hermes/
-        │       │   ├── Hermes.php
-        │       │   ├── Hermes.xml
+        │       ├── models/OPNsense/AIOpenSense/
+        │       │   ├── AIOpenSense.php
+        │       │   ├── AIOpenSense.xml
         │       │   └── Guide.php
-        │       ├── views/OPNsense/Hermes/
+        │       ├── views/OPNsense/AIOpenSense/
         │       │   ├── index.volt
         │       │   ├── guides.volt
         │       │   └── guide.volt
         │       └── services/
-        │           └── OPNsense/Hermes/
+        │           └── OPNsense/AIOpenSense/
         │               └── Service.xml
-        ├── mvc/app/forms/OPNsense/Hermes/
+        ├── mvc/app/forms/OPNsense/AIOpenSense/
         │   └── general.xml
         ├── mvc/app/Menu/
         │   └── Menu.xml
@@ -320,4 +320,4 @@ os-hermes-plugin/
 
 ---
 
-*Document version: 1.0 — initial architecture for os-hermes plugin.*
+*Document version: 1.0 — initial architecture for os-ai-opensense plugin.*

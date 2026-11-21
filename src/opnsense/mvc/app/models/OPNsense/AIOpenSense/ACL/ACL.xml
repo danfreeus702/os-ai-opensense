@@ -1,0 +1,10 @@
+<acl>
+  <page-user-aiopensense>
+    <name>WebCfg - OPNsense AI</name>
+    <description>Allow access to the OPNsense AI assistant and configuration guides</description>
+    <patterns>
+      <pattern>ui/aiopensense/*</pattern>
+      <pattern>api/aiopensense/*</pattern>
+    </patterns>
+  </page-user-aiopensense>
+</acl>
