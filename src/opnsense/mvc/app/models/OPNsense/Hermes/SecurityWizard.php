@@ -70,14 +70,14 @@ class SecurityWizard
         $steps[] = [
             'id' => 'unbound_enable',
             'title' => 'Enable Unbound DNS with local cache',
-            'action' => 'unbound.enable',
+            'action' => 'unbound-enable',
             'detail' => 'Enable the Unbound resolver, set cache size to 4 MB, and enable prefetch.',
             'risk' => 'low',
         ];
         $steps[] = [
             'id' => 'dnsbl',
             'title' => 'Install ad/tracker blocklists',
-            'action' => 'unbound.blocklist',
+            'action' => 'blocklist',
             'detail' => 'Add ' . count($options['blocklists'] ?? self::BLOCKLISTS) . ' blocklists to Unbound.',
             'risk' => 'low',
         ];
@@ -86,7 +86,7 @@ class SecurityWizard
             $steps[] = [
                 'id' => 'doh',
                 'title' => 'Configure encrypted DNS upstream (DoT)',
-                'action' => 'unbound.doh',
+                'action' => 'doh',
                 'detail' => 'OPNsense 26.7 Unbound supports DoT only (no DoH type). Forward to 1.1.1.1:853 with TLS verification of cloudflare-dns.com — the same setup used in production.',
                 'risk' => 'medium',
             ];
@@ -96,14 +96,14 @@ class SecurityWizard
             $steps[] = [
                 'id' => 'dnssec',
                 'title' => 'Enable DNSSEC validation',
-                'action' => 'unbound.dnssec',
+                'action' => 'dnssec',
                 'detail' => 'Validate DNS answers cryptographically. Requires correct system time (NTP).',
                 'risk' => 'medium',
             ];
             $steps[] = [
                 'id' => 'dot',
                 'title' => 'Configure DNS-over-TLS upstreams',
-                'action' => 'unbound.dot',
+                'action' => 'dot',
                 'detail' => 'Add Cloudflare (1.1.1.1@853) and Quad9 (9.9.9.9@853) with TLS certificate verification.',
                 'risk' => 'medium',
             ];
@@ -111,7 +111,7 @@ class SecurityWizard
                 $steps[] = [
                     'id' => 'tailscale_exit',
                     'title' => 'Enable Tailscale exit node',
-                    'action' => 'tailscale.exitnode',
+                    'action' => 'tailscale',
                     'detail' => 'Advertise this OPNsense box as a Tailscale exit node (0.0.0.0/0, ::/0).',
                     'risk' => 'high',
                 ];
@@ -122,7 +122,7 @@ class SecurityWizard
         $steps[] = [
             'id' => 'firewall_dns',
             'title' => 'Allow DNS resolution (TCP/UDP 53)',
-            'action' => 'firewall.rule',
+            'action' => 'firewall',
             'detail' => 'LAN → any, TCP/UDP 53, for local clients to reach Unbound.',
             'risk' => 'low',
         ];
@@ -130,7 +130,7 @@ class SecurityWizard
             $steps[] = [
                 'id' => 'firewall_doh',
                 'title' => 'Allow DNS-over-HTTPS (TCP 443)',
-                'action' => 'firewall.rule',
+                'action' => 'firewall',
                 'detail' => 'LAN → any, TCP 443, for DoH upstream forwarding.',
                 'risk' => 'low',
             ];
@@ -139,7 +139,7 @@ class SecurityWizard
             $steps[] = [
                 'id' => 'firewall_dot',
                 'title' => 'Allow DNS-over-TLS (TCP 853)',
-                'action' => 'firewall.rule',
+                'action' => 'firewall',
                 'detail' => 'LAN → any, TCP 853, for DoT upstream forwarding.',
                 'risk' => 'low',
             ];

@@ -85,8 +85,8 @@ class SecurityWizardController extends ApiControllerBase
     private function runConfigd($action)
     {
         $allowed = [
-            'unbound.enable', 'unbound.blocklist', 'unbound.doh',
-            'unbound.dnssec', 'unbound.dot', 'firewall.rule', 'tailscale.exitnode',
+            'unbound-enable', 'blocklist', 'doh',
+            'dnssec', 'dot', 'firewall', 'tailscale',
         ];
         if (!in_array($action, $allowed, true)) {
             return ['action' => $action, 'ok' => false, 'error' => 'Action not allowed'];
