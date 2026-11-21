@@ -5,7 +5,7 @@ namespace OPNsense\Hermes;
  * Guide model — defines available configuration wizards.
  * Each guide has multiple steps; AI assists at each step.
  */
-class Guide extends \OPNsense\Base\BaseModel
+class Guide
 {
     /**
      * Get all available guides.
@@ -171,7 +171,7 @@ class Guide extends \OPNsense\Base\BaseModel
      */
     public static function getStepSuggestion($guideId, $stepId, $fields = [])
     {
-        // This will be implemented via the API controller which calls Ollama
+        // AI suggestions are generated via GuideApiController using the cloud LLM provider
         return [
             'status' => 'pending',
             'message' => 'AI suggestion will be generated based on your OPNsense configuration.',

@@ -140,9 +140,8 @@ class GuideApiController extends ApiControllerBase
         $config = \OPNsense\Base\Config::load('OPNsense/Hermes');
         $general = $config->get('general');
 
-        $host = isset($general->ollama_host) ? (string)$general->ollama_host : 'http://127.0.0.1:11434';
-        $model = isset($general->ollama_model) ? (string)$general->ollama_model : 'llama3';
-        $systemPrompt = isset($general->system_prompt) ? (string)$general->system_prompt :
+        $settings = \OPNsense\Hermes\LLMProvider::resolve($general);
+        $systemPrompt = isset($general->system_prompt) && (string)$general->system_prompt !== '' ? (string)$general->system_prompt :
             'You are Hermes, an AI assistant for OPNsense firewall administration.';
 
         $opnsenseContext = $this->getOpnsenseContext();
@@ -172,39 +171,12 @@ class GuideApiController extends ApiControllerBase
             . "3. Any warnings or considerations.\n\n"
             . "Format your response with clear sections.";
 
-        $payload = json_encode([
-            'model' => $model,
-            'messages' => [['role' => 'user', 'content' => $prompt]],
-            'stream' => false,
-            'options' => ['temperature' => 0.7, 'max_tokens' => 1500]
-        ]);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, rtrim($host, '/') . '/api/chat');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
-        curl_close($ch);
-
-        if ($curlError) {
-            return ['suggestion' => 'AI unavailable: ' . $curlError, 'explanation' => ''];
+        try {
+            $reply = \OPNsense\Hermes\LLMProvider::chat($systemPrompt, $prompt, $settings);
+            return ['suggestion' => $reply, 'explanation' => ''];
+        } catch (\Exception $e) {
+            return ['suggestion' => 'AI unavailable: ' . $e->getMessage(), 'explanation' => ''];
         }
-        if ($httpCode !== 200) {
-            return ['suggestion' => 'AI error (HTTP ' . $httpCode . ')', 'explanation' => ''];
-        }
-
-        $result = json_decode($response, true);
-        if (isset($result['message']['content'])) {
-            return ['suggestion' => $result['message']['content'], 'explanation' => ''];
-        }
-
         return ['suggestion' => 'No response from AI', 'explanation' => ''];
     }
 
