@@ -369,3 +369,9 @@ Final verification after rebuild + clean reinstall on VM 304:
 | Power > Reboot / Power Off | confirmation pages load; reboot/shutdown NOT executed |
 | Plugin menu | 3 entries visible and clickable |
 | L1 -> L2 -> L3 re-test | all OK, zero failures, levels 1/2/3 |
+
+### Repeat run 1 (2026-11-21) — update check + full menu sweep
+
+- **Update software check:** System → Firmware → Updates → "Check for updates" returned *"Could not find the repository on the selected mirror."* The VM is on the isolated `vmbr50` test network with no internet route, so this is an environment limitation, not a plugin or GUI fault. No Update/Upgrade action was performed.
+- **Menu sweep:** all 157 links visited. First pass flagged 9 core OPNsense pages with empty bodies (2 navigation timeouts). All 9 re-checked individually and loaded correctly — transient browser load timing, not real failures.
+- **Result:** zero plugin-related errors; no code changes needed. Reboot/Power Off pages opened only, not executed.
