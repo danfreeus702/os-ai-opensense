@@ -350,3 +350,22 @@ because the browser tool cannot route to the isolated network):
 
 The single FAIL line in the audit log is from the earlier (pre-fix) failed
 attempts on this VM; all post-fix runs are clean.
+
+## 2026-11-21 — Full left-menu sweep (fresh VM 304)
+
+Clicked/navigated every menu item from Dashboard down to Power/reboot/shutdown. Enumerated the sidebar tree and visited all **157** page links across Lobby, Reporting, System, Interfaces, Firewall, VPN, Services, Power, Help and the plugin's own section. Each page was checked for HTTP failure, fatal PHP errors, 404 text and console errors.
+
+Bugs found and fixed:
+
+1. **Configuration Guides returned 404** — the menu links to `/ui/aiopensense/guides/` (plural) but only `GuideController` (singular) existed; OPNsense maps the URL segment to the controller class name. Added `GuidesController.php` as an alias so both `/guides/` and `/guide/view/?id=...` work. Verified: page body went from 197 to 1158 chars.
+2. **Only one of three plugin menu entries was visible** — `Menu.xml` reused the same `<AIOpenSense>` tag for all three `<menuitem>` blocks, so the last one overwrote the others. Rewrote it in OPNsense's native hierarchical form with a top-level `OPNsense AI` section containing `Security Wizard`, `AI Assistant` and `Configuration Guides`. All three now appear.
+
+Final verification after rebuild + clean reinstall on VM 304:
+
+| Test | Result |
+|---|---|
+| All 157 menu links | 200 OK, zero PHP/404/text errors |
+| Browser console | zero errors across the full sweep |
+| Power > Reboot / Power Off | confirmation pages load; reboot/shutdown NOT executed |
+| Plugin menu | 3 entries visible and clickable |
+| L1 -> L2 -> L3 re-test | all OK, zero failures, levels 1/2/3 |
