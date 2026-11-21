@@ -312,3 +312,41 @@ after install: 3 wizard cards, 8 comparison rows, zero console errors.
 The built .pkg is kept locally in the repo root (gitignored via `*.pkg`).
 To submit officially: fork `opnsense/plugins`, add `net/ai-opensense/`, and
 open a PR; OPNsense maintainers review/sign/publish to the package repo.
+
+## 2026-11-21 — Fresh VM 304 (OPNsense-Test2) test suite
+
+Built a second OPNsense VM on Proxmox `.11` to validate the packaged plugin on
+a separate host:
+
+- Full-cloned VM 302 -> VM 304 (`OPNsense-Test2`, 2 GB RAM, disk on local-lvm).
+- Moved its only NIC to the isolated `vmbr50` bridge; assigned LAN IP
+  `192.168.50.3/24`, gateway `192.168.50.1` (the original test VM).
+- Fixed the cloned pf `reply-to` gateway by reloading the filter, and restarted
+  sshd with `ListenAddress 192.168.50.3` (it had bound to the old `.50` IP).
+- Transferred the built `os-ai-opensense-0.1_1.pkg` via `.11` (the isolated net
+  has no route from .16/.153) and did a clean `pkg delete` + `pkg add`.
+
+Bugs found and fixed during this test:
+
+1. **Package installed `security.py` as 0644** — configd returned `Error (126)`
+   (not executable). Fixed by `chmod 755` in the repo source and rebuilding the
+   package; verified the .pkg now contains `-rwxr-xr-x`.
+2. **Controller treated configd rc=0 as success even when output said
+   `Error (126)`** — the GUI reported "applied successfully" while every action
+   failed. Fixed `runConfigd()` to also flag output beginning with
+   `Error`/`Action not allowed`.
+
+Verification after fixes (via SSH tunnel .16:8097 -> .11 -> 192.168.50.3:80,
+because the browser tool cannot route to the isolated network):
+
+| Test | Result |
+|---|---|
+| L1 -> L2 -> L3 | 4/7/10 steps, all OK, zero failures, levels 1/2/3 |
+| Re-test L1/L2/L3 | all OK, zero failures, correct level markers |
+| Config.xml | level 3; unbound=1, dnssec=1, clamav=1, crowdsec=1 |
+| Firewall | 4 wizard rules in config AND 4 active pf rules |
+| Package | `os-ai-opensense-0.1_1` installed, hooks fired cleanly |
+| GUI | 3 cards, 8 comparison rows, zero console errors |
+
+The single FAIL line in the audit log is from the earlier (pre-fix) failed
+attempts on this VM; all post-fix runs are clean.
