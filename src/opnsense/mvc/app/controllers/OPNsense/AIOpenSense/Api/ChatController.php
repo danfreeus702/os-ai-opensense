@@ -3,6 +3,10 @@ namespace OPNsense\AIOpenSense\Api;
 
 use OPNsense\Base\ApiControllerBase;
 
+// OPNsense does not autoload app/services/ — load plugin service classes explicitly.
+require_once __DIR__ . '/../../../../services/OPNsense/AIOpenSense/FirewallRulesService.php';
+require_once __DIR__ . '/../../../../services/OPNsense/AIOpenSense/LLMProvider.php';
+
 class ChatController extends ApiControllerBase
 {
     /**
@@ -16,7 +20,7 @@ class ChatController extends ApiControllerBase
             return ['status' => 'error', 'message' => 'POST required'];
         }
 
-        $message = $this->request->getPost('message', 'trim');
+        $message = trim((string)$this->request->getPost('message'));
         if (empty($message)) {
             return ['status' => 'error', 'message' => 'Empty message'];
         }
@@ -38,6 +42,8 @@ class ChatController extends ApiControllerBase
             return [
                 'status' => 'ok',
                 'reply' => $aiResponse,
+                // Always offer the official docs search for this question.
+                'documentation_url' => 'https://docs.opnsense.org/search.html?q=' . rawurlencode($message),
                 'parsed_rules' => $parsed['rules'] ?? [],
                 'parsed_nat' => $parsed['nat'] ?? [],
                 'parsed_aliases' => $parsed['aliases'] ?? [],
@@ -62,6 +68,7 @@ class ChatController extends ApiControllerBase
         $context['hostname'] = php_uname('n');
         $context['os'] = 'OPNsense';
         $context['timestamp'] = date('Y-m-d H:i:s');
+        $context['hardware'] = $this->getHardwareInfo();
 
         // Gather from config.xml
         if (file_exists('/conf/config.xml')) {
@@ -137,6 +144,42 @@ class ChatController extends ApiControllerBase
         return $context;
     }
 
+    /**
+     * Hardware/network specs used to tailor recommendations to this appliance.
+     * All values come from local read-only commands; no user input is involved.
+     */
+    private function getHardwareInfo()
+    {
+        $specs = [];
+
+        $cpu = trim((string)shell_exec('/sbin/sysctl -n hw.model 2>/dev/null'));
+        if ($cpu !== '') {
+            $specs['cpu_model'] = $cpu;
+        }
+        $cores = trim((string)shell_exec('/sbin/sysctl -n hw.ncpu 2>/dev/null'));
+        if ($cores !== '') {
+            $specs['cpu_cores'] = $cores;
+        }
+        $mem = (int)trim((string)shell_exec('/sbin/sysctl -n hw.physmem 2>/dev/null'));
+        if ($mem > 0) {
+            $specs['memory_gb'] = round($mem / 1073741824, 1);
+        }
+        $version = trim((string)shell_exec('/usr/local/sbin/opnsense-version 2>/dev/null'));
+        if ($version !== '') {
+            $specs['version'] = $version;
+        }
+        $disk = explode("\n", trim((string)shell_exec('/bin/df -h / 2>/dev/null')));
+        if (count($disk) > 1) {
+            $specs['root_disk'] = trim(end($disk));
+        }
+        $links = trim((string)shell_exec('/sbin/ifconfig -a 2>/dev/null | /usr/bin/grep -E "^[a-z]+[0-9]*:|status:" | head -40'));
+        if ($links !== '') {
+            $specs['interfaces'] = preg_replace('/\s+/', ' ', $links);
+        }
+
+        return $specs;
+    }
+
     private function getInstalledPlugins()
     {
         $plugins = [];
@@ -155,13 +198,26 @@ class ChatController extends ApiControllerBase
 
     private function sendToLLM($message, $context = null, $parsed = null)
     {
-        $config = \OPNsense\Base\Config::load('OPNsense/AIOpenSense');
-        $general = $config->get('general');
+        $model = new \OPNsense\AIOpenSense\AIOpenSense();
+        $general = $model->general;
         $settings = \OPNsense\AIOpenSense\LLMProvider::resolve($general);
+
+        $docsDirective = 'Use the official OPNsense documentation at https://docs.opnsense.org/ as your primary source of truth. '
+            . 'Base configuration answers on it, give the exact GUI menu path, and link the relevant documentation page when known. '
+            . 'If the documentation does not cover the question, say so instead of guessing. '
+            . 'Always make the best recommendation for this specific network and hardware: use the supplied '
+            . 'CPU, memory, disk, interface/link-speed and firewall context, and prefer settings that fit the '
+            . 'reported capacity. State assumptions when specs are unavailable.';
 
         $systemPrompt = isset($general->system_prompt) && (string)$general->system_prompt !== ''
             ? (string)$general->system_prompt
             : 'You are AIOpenSense, an AI assistant for OPNsense firewall administration.';
+
+        // Existing installations have a saved prompt from before docs grounding was
+        // added. Always point queries at the official documentation, even then.
+        if (stripos($systemPrompt, 'docs.opnsense.org') === false) {
+            $systemPrompt .= "\n\n" . $docsDirective;
+        }
 
         // Build context — use provided or fetch fresh. Users can disable this
         // in settings when firewall metadata should not leave the appliance.

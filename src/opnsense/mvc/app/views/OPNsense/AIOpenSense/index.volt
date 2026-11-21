@@ -1,5 +1,8 @@
 <script type="text/javascript">
 $(document).ready(function() {
+    // Lang is not always present on plugin pages — fall back to plain strings.
+    function t(s) { return (typeof Lang !== 'undefined' && Lang && Lang._) ? Lang._(s) : s; }
+
     // Load settings
     $.ajax({
         url: '/api/aiopensense/settings/get',
@@ -24,7 +27,7 @@ $(document).ready(function() {
         if (!msg) return;
         addMessage('user', msg);
         $('#chat-input').val('');
-        var thinkingId = addMessage('system', Lang._('Loading...'));
+        var thinkingId = addMessage('system', t('Loading...'));
         $.ajax({
             url: '/api/aiopensense/chat/query',
             type: 'POST',
@@ -33,7 +36,7 @@ $(document).ready(function() {
             success: function(data) {
                 $('.chat-system:last').remove();
                 if (data.status === 'ok') {
-                    addMessage('assistant', data.reply);
+                    addMessage('assistant', data.reply, data.documentation_url);
                 } else {
                     addMessage('error', data.message || 'Error');
                 }
@@ -47,6 +50,14 @@ $(document).ready(function() {
 
     $('#chat-input').on('keypress', function(e) {
         if (e.which === 13) { e.preventDefault(); $('#btn-send').click(); }
+    });
+
+    // Point the current question at the official OPNsense documentation search.
+    $('#btn-docs').on('click', function() {
+        var q = $('#chat-input').val().trim();
+        if (!q) q = $('.chat-user .chat-text').last().text().trim();
+        if (!q) { alert(t('Type a question first')); return; }
+        window.open('https://docs.opnsense.org/search.html?q=' + encodeURIComponent(q), '_blank', 'noopener');
     });
 
     $('#btn-save-settings').on('click', function() {
@@ -67,15 +78,20 @@ $(document).ready(function() {
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify(data),
-            success: function() { alert(Lang._('Settings saved')); },
-            error: function() { alert(Lang._('Save failed')); }
+            success: function() { alert(t('Settings saved')); },
+            error: function() { alert(t('Save failed')); }
         });
     });
 
-    function addMessage(role, text) {
+    function addMessage(role, text, docUrl) {
         var div = $('<div/>')
             .addClass('chat-msg' + (role === 'user' ? ' chat-user' : role === 'assistant' ? ' chat-ai' : role === 'error' ? ' chat-err' : ' chat-sys'))
             .html('<small class="text-muted"></small><div class="chat-text">' + text.replace(/\n/g, '<br>') + '</div>');
+        if (docUrl) {
+            var link = $('<a/>').attr({href: docUrl, target: '_blank', rel: 'noopener noreferrer'})
+                .text('OPNsense documentation');
+            div.find('.chat-text').append($('<br/>'), link);
+        }
         $('#chat-messages').append(div);
         $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
     }
@@ -96,6 +112,7 @@ $(document).ready(function() {
     #chat-messages .text-muted { color: #b9b9b9; }
     #chat-messages .chat-err .chat-text { color: #ff8a80; }
     #chat-input::placeholder { color: #8a8f9c; }
+    #chat-messages .chat-text a { color: #ffb38a; text-decoration: underline; }
 </style>
 
 <div class="container-fluid">
@@ -138,7 +155,7 @@ $(document).ready(function() {
                             </div>
                             <div class="form-group">
                                 <label>System Prompt</label>
-                                <textarea id="aiopensense-system-prompt" class="form-control" rows="3">You are AIOpenSense, an AI assistant for OPNsense firewall administration. Help with firewall rules, ad blocking, Unbound DNS over TLS, and general configuration.</textarea>
+                                <textarea id="aiopensense-system-prompt" class="form-control" rows="3">You are AIOpenSense, an AI assistant for OPNsense firewall administration. Use the official OPNsense documentation at https://docs.opnsense.org/ as your primary source of truth. Base configuration answers on it, give the exact GUI menu path, and link the relevant documentation page when known. If the documentation does not cover the question, say so instead of guessing. Always make the best recommendation for this network and hardware: use the supplied CPU, memory, disk, interface/link-speed and firewall context, and prefer settings that fit the reported capacity. State assumptions when specs are unavailable.</textarea>
                             </div>
                             <button type="button" id="btn-save-settings" class="btn btn-primary">Save Settings</button>
                         </div>
@@ -153,6 +170,9 @@ $(document).ready(function() {
                     <div class="input-group">
                         <input type="text" id="chat-input" class="form-control" placeholder="Ask about firewall rules, DNS, ad blocking..." autocomplete="off">
                         <span class="input-group-btn">
+                            <button type="button" id="btn-docs" class="btn btn-default" title="Search the official OPNsense documentation for this question">
+                                <span class="glyphicon glyphicon-book"></span> Docs
+                            </button>
                             <button type="button" id="btn-send" class="btn btn-primary">Send</button>
                         </span>
                     </div>

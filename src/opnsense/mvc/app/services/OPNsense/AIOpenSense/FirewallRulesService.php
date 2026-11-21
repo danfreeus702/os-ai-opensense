@@ -1,7 +1,7 @@
 <?php
 namespace OPNsense\AIOpenSense;
 
-class FirewallRulesService extends \OPNsense\Base\ServiceBase
+class FirewallRulesService
 {
     /**
      * Parse natural language into OPNsense firewall rule entries.
@@ -41,8 +41,8 @@ class FirewallRulesService extends \OPNsense\Base\ServiceBase
      */
     private function parseWithLLM($message, $context)
     {
-        $config = \OPNsense\Base\Config::load('OPNsense/AIOpenSense');
-        $general = $config->get('general');
+        $model = new \OPNsense\AIOpenSense\AIOpenSense();
+        $general = $model->general;
 
         $settings = \OPNsense\AIOpenSense\LLMProvider::resolve($general);
         $systemPrompt = isset($general->system_prompt) && (string)$general->system_prompt !== ''

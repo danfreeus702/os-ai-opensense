@@ -424,3 +424,40 @@ Rebuilt and reinstalled on VM 304. Verified computed chat background and
 menu background are both `rgb(16,18,24)`, screenshot shows the panel visually
 consistent with the sidebar, and all 3 plugin pages load with zero console
 errors.
+
+## 2026-11-21 — AI Assistant repair and documentation grounding
+
+Testing the chat path uncovered and fixed four real defects that had made the
+AI Assistant non-functional:
+
+1. `Lang` is undefined on plugin pages → `Send` threw a ReferenceError. Added a
+   `t()` helper that falls back to plain strings.
+2. `InvalidArgumentException: Sanitizer trim not registered` — OPNsense 26.7 no
+   longer registers the `trim` sanitizer. Replaced all `getPost/getParam(...,
+   'trim')` calls in the plugin controllers with `trim((string)...)`.
+3. `FirewallRulesService` and `LLMProvider` live in `app/services/`, which
+   OPNsense does not autoload, and `FirewallRulesService` extended a removed
+   `OPNsense\Base\ServiceBase`. Added explicit `require_once` paths and dropped
+   the obsolete base class.
+4. `OPNsense\Base\Config::load()` no longer exists. Switched to the model class
+   (`new \OPNsense\AIOpenSense\AIOpenSense()`), and moved guide progress to a
+   root-only JSON file at `/conf/aiopensense-guide-progress.json`.
+
+Documentation + hardware grounding:
+- System prompt (default and backend-enforced, including for pre-existing saved
+  prompts) now points to `docs.opnsense.org` as the source of truth and requires
+  the best recommendation for the detected CPU/RAM/disk/interface/link-speed
+  context, stating assumptions when specs are missing.
+- Added `getHardwareInfo()` to the chat context and a `documentation_url`
+  (docs search for the current question) to every API reply.
+- Added a **Docs** button next to Send that opens the official docs search for
+  the typed question.
+
+Verified on VM 304: PHP lint clean, chat API returns HTTP 200 with a clean
+JSON "No API key configured" error (no key on the test VM), Docs button produces
+`https://docs.opnsense.org/search.html?q=...`, Send shows Loading… then a
+graceful error with no console exceptions, and all plugin pages still load.
+
+Added `docs/OPNsense-Lite.md` — a draft design for a slimmed-down profile with a
+four-step setup, keep/simplify/hide/remove feature matrix, hardware-aware
+defaults, safety model, lite menu map and implementation phases.

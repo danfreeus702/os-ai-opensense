@@ -3,6 +3,9 @@ namespace OPNsense\AIOpenSense\Api;
 
 use OPNsense\Base\ApiControllerBase;
 
+// OPNsense does not autoload app/services/ — load plugin service classes explicitly.
+require_once __DIR__ . '/../../../../services/OPNsense/AIOpenSense/LLMProvider.php';
+
 class GuideApiController extends ApiControllerBase
 {
     /**
@@ -21,7 +24,7 @@ class GuideApiController extends ApiControllerBase
      */
     public function getAction()
     {
-        $id = $this->request->getParam('id', 'trim');
+        $id = trim((string)$this->request->getParam('id'));
         if (empty($id)) {
             return ['status' => 'error', 'message' => 'Guide ID required'];
         }
@@ -43,8 +46,8 @@ class GuideApiController extends ApiControllerBase
      */
     public function suggestAction()
     {
-        $guideId = $this->request->getParam('guideId', 'trim');
-        $stepId = $this->request->getParam('stepId', 'trim');
+        $guideId = trim((string)$this->request->getParam('guideId'));
+        $stepId = trim((string)$this->request->getParam('stepId'));
 
         if (empty($guideId) || empty($stepId)) {
             return ['status' => 'error', 'message' => 'Guide ID and Step ID required'];
@@ -64,12 +67,12 @@ class GuideApiController extends ApiControllerBase
      */
     public function saveAction()
     {
-        $guideId = $this->request->getParam('guideId', 'trim');
+        $guideId = trim((string)$this->request->getParam('guideId'));
         if (empty($guideId)) {
             return ['status' => 'error', 'message' => 'Guide ID required'];
         }
 
-        $data = $this->request->getPost('data', 'trim');
+        $data = trim((string)$this->request->getPost('data'));
         if (empty($data)) {
             return ['status' => 'error', 'message' => 'Data required'];
         }
@@ -81,11 +84,9 @@ class GuideApiController extends ApiControllerBase
 
         // Save to config
         try {
-            $config = \OPNsense\Base\Config::load('OPNsense/AIOpenSense');
-            $existing = $config->get('guide_progress');
+            $existing = $this->readProgress();
             $existing[$guideId] = $data;
-            $config->set('guide_progress', $existing);
-            $config->save();
+            $this->writeProgress($existing);
             return ['status' => 'ok', 'message' => 'Progress saved'];
         } catch (\Exception $e) {
             return ['status' => 'error', 'message' => $e->getMessage()];
@@ -98,19 +99,41 @@ class GuideApiController extends ApiControllerBase
      */
     public function progressAction()
     {
-        $guideId = $this->request->getParam('guideId', 'trim');
+        $guideId = trim((string)$this->request->getParam('guideId'));
         if (empty($guideId)) {
             return ['status' => 'error', 'message' => 'Guide ID required'];
         }
 
         try {
-            $config = \OPNsense\Base\Config::load('OPNsense/AIOpenSense');
-            $progress = $config->get('guide_progress');
+            $progress = $this->readProgress();
             $data = isset($progress[$guideId]) ? $progress[$guideId] : [];
             return ['status' => 'ok', 'progress' => $data];
         } catch (\Exception $e) {
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
+    }
+
+    /** Guide progress lives in a root-only JSON file, not config.xml. */
+    private function progressFile()
+    {
+        return '/conf/aiopensense-guide-progress.json';
+    }
+
+    private function readProgress()
+    {
+        $file = $this->progressFile();
+        if (!file_exists($file)) {
+            return [];
+        }
+        $data = json_decode((string)file_get_contents($file), true);
+        return is_array($data) ? $data : [];
+    }
+
+    private function writeProgress(array $data)
+    {
+        $file = $this->progressFile();
+        file_put_contents($file, json_encode($data), LOCK_EX);
+        chmod($file, 0600);
     }
 
     /**
@@ -137,8 +160,8 @@ class GuideApiController extends ApiControllerBase
      */
     private function getAISuggestion($guideId, $stepId)
     {
-        $config = \OPNsense\Base\Config::load('OPNsense/AIOpenSense');
-        $general = $config->get('general');
+        $model = new \OPNsense\AIOpenSense\AIOpenSense();
+        $general = $model->general;
 
         $settings = \OPNsense\AIOpenSense\LLMProvider::resolve($general);
         $systemPrompt = isset($general->system_prompt) && (string)$general->system_prompt !== '' ? (string)$general->system_prompt :

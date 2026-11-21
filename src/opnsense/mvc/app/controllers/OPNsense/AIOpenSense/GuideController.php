@@ -16,7 +16,7 @@ class GuideController extends \OPNsense\Base\IndexController
 
     public function viewAction()
     {
-        $guideId = $this->request->getParam('id', 'trim');
+        $guideId = trim((string)$this->request->getParam('id'));
         if (empty($guideId)) {
             $this->FlashMessage->addError(__('Guide ID required'));
             $this->redirect('/ui/aiopensense/guides/');
