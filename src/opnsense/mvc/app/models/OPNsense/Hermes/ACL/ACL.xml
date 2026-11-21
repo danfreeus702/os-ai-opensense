@@ -1,0 +1,10 @@
+<acl>
+  <page-user-hermes>
+    <name>WebCfg - Hermes AI</name>
+    <description>Allow access to the Hermes AI assistant and configuration guides</description>
+    <patterns>
+      <pattern>ui/hermes/*</pattern>
+      <pattern>api/hermes/*</pattern>
+    </patterns>
+  </page-user-hermes>
+</acl>

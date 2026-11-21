@@ -1,0 +1,8 @@
+<menu>
+  <menuitem order="998">
+    <Hermes VisibleName="Hermes AI" url="/ui/hermes/" />
+  </menuitem>
+  <menuitem order="999">
+    <Hermes VisibleName="Configuration Guides" url="/ui/hermes/guides/" />
+  </menuitem>
+</menu>

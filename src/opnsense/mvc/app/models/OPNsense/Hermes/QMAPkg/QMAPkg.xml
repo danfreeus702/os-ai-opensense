@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<model:object type="model" name="QMAPkg" xmlns:model="http://typo3.org/schema/opnsense/model">
+    <model:description>QEMU Machine Access Package manager for OPNsense plugin management</model:description>
+    
+    <model:field name="qmp_socket" type="string">
+        <model:description>Path to QMP socket</model:description>
+        <model:default>/var/run/qemu-server/{vm_id}.qmp</model:default>
+    </model:field>
+    
+    <model:field name="vm_id" type="integer">
+        <model:description>VM ID</model:description>
+        <model:validation>
+            <model:rule name="numerical">
+                <model:message>VM ID must be a number</model:message>
+            </model:rule>
+        </model:validation>
+    </model:field>
+    
+    <model:field name="username" type="string">
+        <model:description>Console username</model:description>
+        <model:default>root</model:default>
+    </model:field>
+    
+    <model:field name="password" type="string">
+        <model:description>Console password</model:description>
+    </model:field>
+    
+    <model:field name="service_name" type="string">
+        <model:description>Service to manage</model:description>
+        <model:default>sshd</model:default>
+    </model:field>
+    
+    <model:field name="screenshot_path" type="string">
+        <model:description>Path for screenshots</model:description>
+        <model:default>/tmp/vm{vm_id}_screenshot.ppm</model:default>
+    </model:field>
+    
+    <model:field name="connection_timeout" type="integer">
+        <model:description>QMP connection timeout in seconds</model:description>
+        <model:default>10</model:default>
+    </model:field>
+</model:object>

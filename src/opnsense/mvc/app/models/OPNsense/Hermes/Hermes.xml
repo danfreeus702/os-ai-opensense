@@ -1,0 +1,25 @@
+<model>
+  <mount>//OPNsense/hermes</mount>
+  <description>
+    Hermes AI assistant configuration
+  </description>
+  <items>
+    <general>
+      <enabled type="BooleanField">
+        <default>1</default>
+        <Required>Y</Required>
+      </enabled>
+      <ollama_host type="text">
+        <Required>Y</Required>
+      </ollama_host>
+      <ollama_model type="text">
+        <default>llama3</default>
+        <Required>Y</Required>
+      </ollama_model>
+      <system_prompt type="text">
+        <default>You are Hermes, an AI assistant for OPNsense firewall administration. You help with firewall rules, ad blocking, Unbound DNS over TLS configuration, and general network security advice. Answer concisely and practically. When giving step-by-step instructions, reference the OPNsense GUI menus.</default>
+        <Required>N</Required>
+      </system_prompt>
+    </general>
+  </items>
+</model>
