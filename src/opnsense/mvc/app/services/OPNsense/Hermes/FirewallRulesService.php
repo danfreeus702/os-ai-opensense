@@ -44,10 +44,10 @@ class FirewallRulesService extends \OPNsense\Base\ServiceBase
         $config = \OPNsense\Base\Config::load('OPNsense/Hermes');
         $general = $config->get('general');
 
-        $host = isset($general->ollama_host) ? (string)$general->ollama_host : 'http://127.0.0.1:11434';
-        $model = isset($general->ollama_model) ? (string)$general->ollama_model : 'llama3.1';
-        $systemPrompt = isset($general->system_prompt) ? (string)$general->system_prompt :
-            'You are Hermes, an AI assistant for OPNsense firewall administration.';
+        $settings = \OPNsense\Hermes\LLMProvider::resolve($general);
+        $systemPrompt = isset($general->system_prompt) && (string)$general->system_prompt !== ''
+            ? (string)$general->system_prompt
+            : 'You are Hermes, an AI assistant for OPNsense firewall administration. Return only valid JSON.';
 
         $contextStr = $this->contextToText($context);
 
@@ -83,35 +83,11 @@ class FirewallRulesService extends \OPNsense\Base\ServiceBase
             . "- if the request is ambiguous, make a reasonable assumption and note it in explanation\n"
             . "- return empty arrays if the request cannot be parsed";
 
-        $payload = json_encode([
-            'model' => $model,
-            'messages' => [['role' => 'user', 'content' => $prompt]],
-            'stream' => false,
-            'format' => 'json',
-            'options' => ['temperature' => 0.3, 'max_tokens' => 2048]
-        ]);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, rtrim($host, '/') . '/api/chat');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
-        curl_close($ch);
-
-        if ($curlError) return null;
-        if ($httpCode !== 200) return null;
-
-        $result = json_decode($response, true);
-        if (!isset($result['message']['content'])) return null;
-
-        $content = $result['message']['content'];
+        try {
+            $content = \OPNsense\Hermes\LLMProvider::chat($systemPrompt, $prompt, $settings);
+        } catch (\Exception $e) {
+            return null;
+        }
         $data = json_decode(trim($content), true);
         if (!$data) return null;
 
