@@ -1,4 +1,7 @@
 <menu>
+  <menuitem order="997">
+    <Hermes VisibleName="Security Wizard" url="/ui/hermes/security/" />
+  </menuitem>
   <menuitem order="998">
     <Hermes VisibleName="Hermes AI" url="/ui/hermes/" />
   </menuitem>
