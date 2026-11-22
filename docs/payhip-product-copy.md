@@ -91,6 +91,10 @@ opnsense-ai-guide-pt.pdf   opnsense-ai-guide-pt.epub
 
 ## Listing 2 — Homelab Security Field Kit (bundle)
 
+**Status: PUBLISHED 2026-11-22** — https://payhip.com/b/n1q7M (product key
+`n1q7M`), price **$29**, eight files (PDF + EPUB of all four guides), cover
+image uploaded. The original launch note below is kept for context.
+
 **Launch note:** do not publish this listing until the three companion guides
 exist. Launch the flagship first, write the three short guides next, then
 switch this on as the higher-value package.
