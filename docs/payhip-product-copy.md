@@ -155,3 +155,54 @@ three companion guides once written.
    convert them the same way.
 3. **Then:** publish Listing 2 at $29 and add a cross-link from each single
    guide ("save 35% with the bundle").
+
+---
+
+## Listing 3 — Networking for Beginners (published 2026-11-22)
+
+**Product title**
+> Networking for Beginners: A Hands-On Guide to How Networks Really Work
+
+**Price**
+> **$9** (complete guide, 12 chapters, PDF + EPUB).
+
+**Tagline / short description**
+> Learn how networks really work — IP addresses, subnets, DNS, routing,
+> firewalls, Wi-Fi and a troubleshooting toolkit. Twelve practical chapters,
+> no prior experience needed.
+
+**Long description**
+
+> A beginner-friendly, hands-on guide to the network you already use every
+> day. No degree, no rack of servers, no expensive gear — just a computer, a
+> home router and curiosity.
+>
+> **What you'll learn**
+>
+> - What a network is, and the postal-service analogy that makes it click.
+> - IP addresses, subnet masks and CIDR, with private ranges explained.
+> - MAC addresses, switches and ARP — how local delivery really works.
+> - Routing, default gateways and NAT — how a packet leaves your network.
+> - DNS, record types, TTL and why plain DNS leaks your queries.
+> - DHCP (DORA), home-router roles, and static vs dynamic addresses.
+> - Ports, TCP vs UDP, and how a stateful firewall makes decisions.
+> - Wi-Fi bands, channels, WPA2/WPA3 and placement.
+> - A seven-step troubleshooting workflow using `ping`, `traceroute`,
+>   `nslookup`, `dig`, `curl`, `ss` and `arp`.
+> - How to build a small home lab and document every change.
+>
+> **Format:** complete 12-chapter guide in PDF and EPUB, with a glossary and
+> next steps. Version 1.0 — no "coming soon" chapters.
+>
+> **Who it's for:** complete beginners, students, home-lab owners, and anyone
+> who wants to understand what their router is actually doing.
+
+**Files uploaded**
+```text
+networking-for-beginners.pdf
+networking-for-beginners.epub
+networking-for-beginners-cover.png   (product cover image)
+```
+
+**Suggested tags:** `networking`, `beginners`, `homelab`, `dns`, `subnets`,
+`tcp ip`, `wifi`, `troubleshooting`
