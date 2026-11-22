@@ -66,7 +66,7 @@ If this plugin saved you time, you can support ongoing development:
 
 - ⭐ Star the repo and share it.
 - 💛 [GitHub Sponsors](https://github.com/sponsors/danfreeus702) — enable Sponsors in your GitHub settings first, then this link becomes active.
-- 📘 **Practical guide:** *OPNsense AI Security Wizard: The Practical Guide* — draft in `docs/ebook-opnsense-ai-guide.md`, with Spanish, French, German and Portuguese versions in `docs/ebook-i18n/`.
+- 📘 **Practical guide:** *OPNsense AI Security Wizard: The Practical Guide* — [buy on Payhip ($12)](https://payhip.com/b/Si85b). PDF + EPUB in English, Spanish, French, German and Portuguese; early-access draft with free updates until v1.0. Source draft in `docs/ebook-opnsense-ai-guide.md`, translations in `docs/ebook-i18n/`.
 - 🛠 **Paid setup/help:** open an issue or discussion for commercial support enquiries.
 
 ## Why this project
