@@ -66,17 +66,25 @@ application form (attach your resume). Always verify the role is still open.
 
 I'm Daniel Freeman (CCNA, 2006), an infrastructure-focused engineer targeting entry-level Azure cloud roles. I built a native OPNsense AI Security Wizard plugin (52 commits, tested on two 26.7 VMs, 157-link menu sweep, zero console errors) with config snapshots and one-click rollback, and wrote a hands-on Terraform + FLOCI guide covering IaC, state backends and CI. I'm comfortable with Linux, TCP/IP, DNS/DNS-over-TLS and Proxmox VMs, and I document every change. Portfolio: https://github.com/danfreeus702/os-ai-opensense
 
+Please forward this email to anyone you think may be interested in talking to me.
+
 ### CLOUD
 
 I'm Daniel Freeman (CCNA, 2006), moving into entry-level cloud engineering. My portfolio includes a tested OPNsense AI plugin (52 commits, configd snapshot/undo, cloud-LLM assistant) and a Terraform + FLOCI guide with real S3/SQS/DynamoDB/SSM labs. I have hands-on Linux, networking (subnets, routing, DNS) and Proxmox VM experience, and I work from documented, reversible changes. Portfolio: https://github.com/danfreeus702/os-ai-opensense
+
+Please forward this email to anyone you think may be interested in talking to me.
 
 ### SUPPORT
 
 I'm Daniel Freeman (CCNA, 2006). I built and documented a native OPNsense AI wizard used to harden firewalls safely: plain-language diffs with exact GUI paths, config snapshots with one-click undo, an offline help index, and a hardware-aware cloud assistant. I wrote a Networking for Beginners guide covering TCP/IP, subnetting, DNS, Wi-Fi and a seven-step troubleshooting workflow. I'm strong on Linux, documentation and methodical problem isolation. Portfolio: https://github.com/danfreeus702/os-ai-opensense
 
+Please forward this email to anyone you think may be interested in talking to me.
+
 ### DEVOPS
 
 I'm Daniel Freeman (CCNA, 2006). I work in Linux, Proxmox and Infrastructure-as-Code: my OPNsense AI plugin uses configd snapshot/undo with a reviewable diff before every apply, and my Terraform + FLOCI guide builds local AWS labs with S3/SQS/DynamoDB, remote state and CI. I'm looking for an entry-level DevOps/support role where I can automate carefully and document everything. Portfolio: https://github.com/danfreeus702/os-ai-opensense
+
+Please forward this email to anyone you think may be interested in talking to me.
 
 ## How to use
 
