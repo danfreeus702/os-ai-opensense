@@ -95,6 +95,15 @@ opnsense-ai-guide-pt.pdf   opnsense-ai-guide-pt.epub
 `n1q7M`), price **$29**, eight files (PDF + EPUB of all four guides), cover
 image uploaded. The original launch note below is kept for context.
 
+The three companions are also published individually, each with a cross-link
+back to the bundle:
+
+| Guide | Price | URL |
+|---|---|---|
+| No-Leak DNS for Homelabs | $7 | https://payhip.com/b/fP8vm |
+| Tailscale Exit Node on AlmaLinux | $5 | https://payhip.com/b/mtHGB |
+| Terraform + FLOCI: AWS Labs Without the AWS Bill | $10 | https://payhip.com/b/Hd59U |
+
 **Launch note:** do not publish this listing until the three companion guides
 exist. Launch the flagship first, write the three short guides next, then
 switch this on as the higher-value package.

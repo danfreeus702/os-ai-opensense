@@ -69,6 +69,7 @@ If this plugin saved you time, you can support ongoing development:
 - 📘 **Practical guide:** *OPNsense AI Security Wizard: The Practical Guide* — [buy on Payhip ($12)](https://payhip.com/b/Si85b). PDF + EPUB in English, Spanish, French, German and Portuguese; early-access draft with free updates until v1.0. Source draft in `docs/ebook-opnsense-ai-guide.md`, translations in `docs/ebook-i18n/`.
 - 🌐 **Networking for Beginners:** [buy on Payhip ($9)](https://payhip.com/b/gQr2P) — 12-chapter beginner guide (PDF + EPUB).
 - 🎁 **Bundle:** [Homelab Security Field Kit ($29)](https://payhip.com/b/n1q7M) — four guides (OPNsense AI wizard, no-leak DNS, Tailscale exit node, Terraform + FLOCI), PDF + EPUB.
+- 📚 **Individual companion guides:** [No-Leak DNS ($7)](https://payhip.com/b/fP8vm), [Tailscale Exit Node ($5)](https://payhip.com/b/mtHGB), [Terraform + FLOCI ($10)](https://payhip.com/b/Hd59U) — each PDF + EPUB, with a link back to the bundle.
 - 🛠 **Paid setup/help:** open an issue or discussion for commercial support enquiries.
 
 ## Why this project
