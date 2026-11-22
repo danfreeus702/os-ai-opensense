@@ -22,7 +22,7 @@ welcomes "initiative applications" by email to `contact@deciso.com`.
 > diff with exact GUI paths before changes, and saves a config snapshot with a
 > one-click undo.
 >
-> I treated it as a real engineering exercise rather than a demo: 44 commits,
+> I treated it as a real engineering exercise rather than a demo: 52 commits,
 > packaging via `make package`, clean install/delete cycles on two OPNsense
 > 26.7.9 VMs, a full 157-link menu regression sweep with zero console errors,
 > and a repeatable L1→L2→L3 test suite with zero failures. While doing this I
