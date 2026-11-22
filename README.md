@@ -67,6 +67,7 @@ If this plugin saved you time, you can support ongoing development:
 - ⭐ Star the repo and share it.
 - 💛 [GitHub Sponsors](https://github.com/sponsors/danfreeus702) — enable Sponsors in your GitHub settings first, then this link becomes active.
 - 📘 **Practical guide:** *OPNsense AI Security Wizard: The Practical Guide* — [buy on Payhip ($12)](https://payhip.com/b/Si85b). PDF + EPUB in English, Spanish, French, German and Portuguese; early-access draft with free updates until v1.0. Source draft in `docs/ebook-opnsense-ai-guide.md`, translations in `docs/ebook-i18n/`.
+- 🌐 **Networking for Beginners:** [buy on Payhip ($9)](https://payhip.com/b/gQr2P) — 12-chapter beginner guide (PDF + EPUB).
 - 🛠 **Paid setup/help:** open an issue or discussion for commercial support enquiries.
 
 ## Why this project
