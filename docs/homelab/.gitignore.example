@@ -1,0 +1,14 @@
+# Local filled-in copies and secrets — never commit these
+filled/
+local/
+.secrets/
+auth-keys.md
+*.key
+*.pem
+*.cred
+*.env
+*.ab
+*.sqlite
+*.state
+*token*
+*password*
