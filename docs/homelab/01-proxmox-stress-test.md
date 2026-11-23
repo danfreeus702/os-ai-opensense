@@ -191,3 +191,30 @@ brief startup burst in the reverse 100 Mbit/s test. CPU headroom remained large.
 
 To test true inbound port 5201 later, add a temporary firewall pass rule on the
 DUT LAN interface, run `iperf3 -s` on the DUT, then remove the rule afterward.
+
+## REA static binary scan (follow-up)
+
+REA's pcap inspection was unavailable locally because TShark/capinfos were not
+installed for the analyzer. Instead, two FreeBSD ELF64 binaries from the DUT were
+staged through the generator CT and scanned statically.
+
+| Binary | Size | Hardening summary |
+|---|---:|---|
+| `iperf3` | 7,488 B | ET_EXEC (PIE off), NX on, partial RELRO, CET off, stripped, RUNPATH `/usr/local/lib:/usr/local/lib` |
+| `lighttpd` | 358,008 B | ET_EXEC (PIE off), NX on, partial RELRO, stack protector on, CET off, stripped, RUNPATH `/usr/local/lib` |
+
+Dependencies:
+
+- `lighttpd`: 5 needed libraries, 183 imports, 0 issues — `libpcre2-8.so.0`,
+  `libdl.so.1`, `libnettle.so.8`, `libthr.so.3`, `libc.so.7`.
+- `iperf3`: 6 needed libraries, 25 imports, 0 issues — `libiperf.so.0`,
+  `libssl.so.17`, `libcrypto.so.17`, `libthr.so.3`, `libm.so.5`, `libc.so.7`.
+
+Findings: no malformed headers or dependency problems. Hardening is typical
+FreeBSD packaging rather than a hardened build: no PIE, no CET, partial RELRO,
+and FORTIFY is unconfirmed. The duplicated RUNPATH on `iperf3` is cosmetic.
+This is a static header/dependency check, not exploitability proof or a CVE scan.
+
+Reusable REA tools for this kind of work include `inspect_binary_hardening`,
+`inspect_elf_dependencies`, `inspect_go_binary`, `search_strings`,
+`inspect_apk_signature`, and `inspect_pcap_capture` (when TShark is available).
